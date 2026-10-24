@@ -62,7 +62,7 @@ export default function Home() {
               <GraduationCap size={24} />
             </div>
             <span className="text-xl font-bold tracking-tight">
-              Campus<span className="text-blue-600">Vault</span>
+              MU<span className="text-blue-600">Archive</span>
             </span>
           </Link>
 
