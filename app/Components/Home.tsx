@@ -17,7 +17,7 @@ const features = [
     icon: LibraryBig,
     title: "Semester Archives",
     description:
-      "Explore organized academic resources by department, semester, and batch.",
+      "Academic resources by department, semester, and batch.",
     label: "Browse archives",
     href: "/archives",
     color: "bg-blue-50 text-blue-600",
@@ -26,7 +26,7 @@ const features = [
     icon: FileText,
     title: "Previous Question Papers",
     description:
-      "Prepare smarter with previous exam questions collected from different batches.",
+      "Previous exam questions collected from different batches.",
     label: "Explore questions",
     href: "/question-bank",
     color: "bg-orange-50 text-orange-600",
@@ -35,7 +35,7 @@ const features = [
     icon: Star,
     title: "Faculty Feedback",
     description:
-      "Discover student ratings and constructive reviews to make informed choices.",
+      "Student ratings and constructive reviews about our faculty members.",
     label: "View faculty",
     href: "/faculty",
     color: "bg-amber-50 text-amber-600",
@@ -62,7 +62,7 @@ export default function Home() {
               <GraduationCap size={24} />
             </div>
             <span className="text-xl font-bold tracking-tight">
-              MU<span className="text-blue-600">Archive</span>
+              MU <span className="text-blue-600">Archive</span>
             </span>
           </Link>
 
@@ -124,7 +124,7 @@ export default function Home() {
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-sm font-medium text-blue-700">
               <ShieldCheck size={16} />
-              Your university resource hub
+              Metropolitan University Resource Hub
             </div>
 
             <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -134,8 +134,8 @@ export default function Home() {
 
             <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
               Discover semester-wise archives, previous question papers, shared
-              study notes, and faculty feedback — all in one community built for
-              students.
+              study notes, and faculty feedback — all in one community built for the 
+              students of MU.
             </p>
 
             {/* Search bar */}
@@ -274,7 +274,7 @@ export default function Home() {
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">
-                Explore CampusVault
+                Explore MU Archive
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
                 Everything you need to study smarter
@@ -334,14 +334,14 @@ export default function Home() {
           <Link href="/" className="flex items-center gap-2">
             <GraduationCap className="text-blue-600" size={22} />
             <span className="font-bold">
-              Campus<span className="text-blue-600">Vault</span>
+              MU <span className="text-blue-600">Archive</span>
             </span>
           </Link>
           <p className="text-center text-sm text-slate-500">
             A better way to share knowledge and learn together.
           </p>
           <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} CampusVault
+            © {new Date().getFullYear()} MU Archive
           </p>
         </div>
       </footer>
