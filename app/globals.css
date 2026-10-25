@@ -1,26 +1,383 @@
 @import "tailwindcss";
 
+/* =========================================
+   1. ROOT VARIABLES — LIGHT THEME
+========================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* Brand Colors */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-dark: #1e3a8a;
+  --primary-light: #eff6ff;
+
+  --accent: #dc2626;
+  --accent-hover: #b91c1c;
+  --accent-light: #fef2f2;
+
+  /* Backgrounds */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-secondary: #f1f5f9;
+
+  /* Text */
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
+
+  /* Borders */
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Status Colors */
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+
+  --danger: #dc2626;
+  --danger-light: #fef2f2;
+
+  --info: #0284c7;
+  --info-light: #f0f9ff;
+
+  /* UI Effects */
+  --radius: 0.75rem;
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 12px 28px -8px rgb(15 23 42 / 0.12);
+
+  /* Focus Ring */
+  --ring: #93c5fd;
 }
+
+/* =========================================
+   2. TAILWIND CSS V4 THEME
+========================================= */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Backgrounds and Text */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Brand Colors */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+
+  /* Borders */
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  /* Status Colors */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+
+  --color-danger: var(--danger);
+  --color-danger-light: var(--danger-light);
+
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+
+  /* Border Radius */
+  --radius-card: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================
+   3. DARK THEME
+========================================= */
+
+.dark {
+  color-scheme: dark;
+
+  --background: #0b1120;
+  --surface: #111827;
+  --surface-secondary: #1e293b;
+
+  --foreground: #f1f5f9;
+  --muted: #94a3b8;
+  --muted-foreground: #64748b;
+
+  --border: #334155;
+  --border-strong: #475569;
+
+  --primary: #60a5fa;
+  --primary-hover: #93c5fd;
+  --primary-dark: #3b82f6;
+  --primary-light: #172554;
+
+  --accent: #f87171;
+  --accent-hover: #fca5a5;
+  --accent-light: #450a0a;
+
+  --success: #4ade80;
+  --success-light: #052e16;
+
+  --warning: #fbbf24;
+  --warning-light: #451a03;
+
+  --danger: #f87171;
+  --danger-light: #450a0a;
+
+  --info: #38bdf8;
+  --info-light: #082f49;
+
+  --ring: #3b82f6;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.25);
+  --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.35);
+}
+
+/* =========================================
+   4. GLOBAL RESET
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  margin: 0;
+
+  background-color: var(--background);
   color: var(--foreground);
+
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* =========================================
+   5. HEADINGS AND TEXT
+========================================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--foreground);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+p {
+  color: inherit;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* =========================================
+   6. SELECTION AND SCROLLBAR
+========================================= */
+
+::selection {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted);
+}
+
+/* =========================================
+   7. FORM ELEMENTS
+========================================= */
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  color: var(--foreground);
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* =========================================
+   8. REUSABLE UI CLASSES
+========================================= */
+
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-hover {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.border-default {
+  border-color: var(--border);
+}
+
+/* =========================================
+   9. BUTTON STYLES
+========================================= */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.625rem 1.125rem;
+
+  background-color: var(--primary);
+  color: #ffffff;
+
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  color: #ffffff;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.625rem 1.125rem;
+
+  background-color: var(--accent);
+  color: #ffffff;
+
+  border: 1px solid transparent;
+  border-radius: 0.625rem;
+
+  font-weight: 600;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+  color: #ffffff;
+}
+
+/* =========================================
+   10. ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
