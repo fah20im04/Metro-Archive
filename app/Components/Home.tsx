@@ -11,13 +11,13 @@ import {
   LibraryBig,
   Menu,
 } from "lucide-react";
+import Navbar from "./Navbar";
 
 const features = [
   {
     icon: LibraryBig,
     title: "Semester Archives",
-    description:
-      "Academic resources by department, semester, and batch.",
+    description: "Academic resources by department, semester, and batch.",
     label: "Browse archives",
     href: "/archives",
     color: "bg-blue-50 text-blue-600",
@@ -25,8 +25,7 @@ const features = [
   {
     icon: FileText,
     title: "Previous Question Papers",
-    description:
-      "Previous exam questions collected from different batches.",
+    description: "Previous exam questions collected from different batches.",
     label: "Explore questions",
     href: "/question-bank",
     color: "bg-orange-50 text-orange-600",
@@ -54,67 +53,6 @@ const features = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-white text-slate-900">
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-lg">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-              <GraduationCap size={24} />
-            </div>
-            <span className="text-xl font-bold tracking-tight">
-              MU <span className="text-blue-600">Archive</span>
-            </span>
-          </Link>
-
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href="/" className="text-sm font-semibold text-blue-600">
-              Home
-            </Link>
-            <Link
-              href="/archives"
-              className="text-sm text-slate-600 transition hover:text-blue-600"
-            >
-              Archives
-            </Link>
-            <Link
-              href="/question-bank"
-              className="text-sm text-slate-600 transition hover:text-blue-600"
-            >
-              Question Bank
-            </Link>
-            <Link
-              href="/faculty"
-              className="text-sm text-slate-600 transition hover:text-blue-600"
-            >
-              Faculty
-            </Link>
-          </div>
-
-          <div className="hidden items-center gap-3 sm:flex">
-            <Link
-              href="/login"
-              className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/register"
-              className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-            >
-              Get Started <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <button
-            type="button"
-            aria-label="Open navigation menu"
-            className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 md:hidden"
-          >
-            <Menu size={24} />
-          </button>
-        </nav>
-      </header>
-
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-100/60 blur-3xl" />
@@ -134,8 +72,8 @@ export default function Home() {
 
             <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
               Discover semester-wise archives, previous question papers, shared
-              study notes, and faculty feedback — all in one community built for the 
-              students of MU.
+              study notes, and faculty feedback — all in one community built for
+              the students of MU.
             </p>
 
             {/* Search bar */}
@@ -313,8 +251,12 @@ export default function Home() {
                   <p className="mt-3 min-h-20 text-sm leading-6 text-slate-600">
                     {feature.description}
                   </p>
-
-      <Features />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-slate-100 bg-white px-5 py-8 sm:px-8">
