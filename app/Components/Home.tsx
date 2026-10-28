@@ -314,19 +314,7 @@ export default function Home() {
                     {feature.description}
                   </p>
 
-                  <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-blue-600">
-                    {feature.label}
-                    <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <Features />
 
       {/* Footer */}
       <footer className="border-t border-slate-100 bg-white px-5 py-8 sm:px-8">
