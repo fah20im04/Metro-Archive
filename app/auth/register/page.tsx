@@ -502,15 +502,22 @@ export default function RegisterPage() {
               </button>
             </form>
 
-            {/* Login link */}
-            <p className="mt-6 text-center text-sm text-muted">
-              Already have an account?{" "}
-              <Link
-                href="/Auth/login"
-                className="font-semibold text-primary transition hover:underline"
-              >
-                Sign in
-              </Link>
+            {/* Login Link */}
+            <div className="mt-7 text-center">
+              <p className="text-sm text-muted">
+                Already have an account?{" "}
+                <Link
+                  href="/auth/login"
+                  className="font-semibold text-primary transition hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
+
+            <p className="mt-7 text-center text-xs leading-5 text-muted">
+              Your university ID should be unique to your account. Registration
+              and student verification must be handled securely by the server.
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-muted">

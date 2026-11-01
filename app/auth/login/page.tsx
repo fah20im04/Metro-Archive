@@ -314,27 +314,16 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {/* Registration link */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-muted">
-                New to CampusVault?{" "}
-                <Link
-                  href="/Auth/register"
-                  className="font-semibold text-primary transition hover:text-primary-hover hover:underline"
-                >
-                  Create an account
-                </Link>
-              </p>
-            </div>
-
-            {/* Security footer */}
-            <div className="mt-8 flex items-center justify-center gap-2 border-t border-border pt-6">
-              <ShieldCheck size={15} className="text-success" />
-
-              <p className="text-xs text-muted">
-                Your academic space, securely accessible.
-              </p>
-            </div>
+            {/* Footer Sign Up Link */}
+            <p className="mt-8 text-center text-xs text-muted">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/auth/register"
+                className="font-semibold text-primary hover:underline"
+              >
+                Create an account
+              </Link>
+            </p>
           </div>
         </section>
       </div>
