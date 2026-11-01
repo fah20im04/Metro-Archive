@@ -3,6 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 
+interface Department {
+  _id: string;
+  name: string;
+}
+
+interface FacultyFilters {
+  q: string;
+  departmentId: string;
+  designation: string;
+}
+
+interface FacultySearchProps {
+  departments?: Department[];
+  onChange?: (filters: FacultyFilters) => void;
+}
+
 const DESIGNATIONS = [
   "Professor",
   "Associate Professor",
@@ -16,36 +32,41 @@ const DEBOUNCE_MS = 300;
 const selectClass =
   "w-full cursor-pointer rounded-xl border-0 bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition-colors focus-visible:outline-none md:w-auto";
 
-/**
- * Props:
- *  - departments: [{ _id, name }]  department list for the dropdown
- *  - onChange(filters): called with { q, departmentId, designation }
- *    (q is debounced, the dropdowns fire immediately)
- */
-export default function FacultySearch({ departments = [], onChange }) {
+export default function FacultySearch({
+  departments = [],
+  onChange,
+}: FacultySearchProps) {
   const [q, setQ] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [designation, setDesignation] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
-  // keep latest callback without retriggering effects
+  // Keep the latest callback without retriggering effects.
   const onChangeRef = useRef(onChange);
+
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // debounce the name input
+  // Debounce the search input.
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(q.trim()), DEBOUNCE_MS);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => {
+      setDebouncedQ(q.trim());
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
   }, [q]);
 
-  // emit filters whenever any of them settles
+  // Emit filters whenever they change.
   useEffect(() => {
-    onChangeRef.current?.({ q: debouncedQ, departmentId, designation });
+    onChangeRef.current?.({
+      q: debouncedQ,
+      departmentId,
+      designation,
+    });
   }, [debouncedQ, departmentId, designation]);
 
-  const hasFilters = q || departmentId || designation;
+  const hasFilters = Boolean(q || departmentId || designation);
 
   const clear = () => {
     setQ("");
@@ -62,12 +83,13 @@ export default function FacultySearch({ departments = [], onChange }) {
           <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
             Faculty Directory
           </h1>
+
           <p className="mt-1 text-sm text-muted-foreground">
             Find faculty members by name, department, or designation.
           </p>
         </div>
 
-        {/* Search bar */}
+        {/* Search Bar */}
         <div
           role="search"
           className="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-2 shadow-lg shadow-black/5 transition-colors duration-200 md:flex-row md:items-center md:gap-3"
@@ -75,6 +97,7 @@ export default function FacultySearch({ departments = [], onChange }) {
           {/* Name */}
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <Search className="ml-2 shrink-0 text-muted-foreground" size={21} />
+
             <input
               type="search"
               value={q}
@@ -95,9 +118,10 @@ export default function FacultySearch({ departments = [], onChange }) {
             className={selectClass}
           >
             <option value="">All departments</option>
-            {departments.map((d) => (
-              <option key={d._id} value={d._id}>
-                {d.name}
+
+            {departments.map((department) => (
+              <option key={department._id} value={department._id}>
+                {department.name}
               </option>
             ))}
           </select>
@@ -112,13 +136,15 @@ export default function FacultySearch({ departments = [], onChange }) {
             className={selectClass}
           >
             <option value="">All designations</option>
-            {DESIGNATIONS.map((d) => (
-              <option key={d} value={d}>
-                {d}
+
+            {DESIGNATIONS.map((item) => (
+              <option key={item} value={item}>
+                {item}
               </option>
             ))}
           </select>
 
+          {/* Clear Filters */}
           {hasFilters && (
             <button
               type="button"
