@@ -11,6 +11,8 @@ import {
   ArrowRight,
   BookOpen,
   Loader2,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import AuthWelcomePanel from "@/app/Components/Reusable/AuthWelcomePanel";
 
@@ -21,170 +23,244 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API Auth Request
+    // Replace this simulated request with your authentication API.
     setTimeout(() => {
       setIsLoading(false);
     }, 1500);
   };
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4 transition-colors duration-300 sm:p-6 lg:p-8">
-      <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-surface shadow-lg lg:grid-cols-12">
-        {/* Left Reusable Welcome Panel */}
-        <div className="hidden lg:col-span-7 lg:block">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-8 transition-colors duration-300 sm:px-6 lg:px-8">
+      {/* Subtle background decorations */}
+      <div className="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-primary-light/60 blur-3xl" />
+
+      <div className="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-accent-light/40 blur-3xl" />
+
+      {/* Main login container */}
+      <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl shadow-black/5 lg:min-h-[680px] lg:grid-cols-2">
+        {/* =====================================
+            LEFT PANEL
+        ====================================== */}
+        <section className="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-10 xl:p-12">
+          {/* Existing reusable welcome panel */}
           <AuthWelcomePanel
-            title="Welcome back to your academic hub."
-            description="Access peer-reviewed lecture notes, past exam papers, research journals, and department schedules in seconds."
+            title="Your university life, all in one place."
+            description="Everything you need to stay ahead academically. Discover lecture notes, explore previous exam papers, and learn alongside your university community."
           >
-            {/* Login Feature Preview Card */}
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-lg backdrop-blur-md">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
-                  <BookOpen size={18} className="text-blue-200" />
+            {/* Resource preview */}
+            <div className="mt-8 space-y-4">
+              {/* Main resource card */}
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-5 shadow-xl backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/15 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15">
+                      <BookOpen size={21} className="text-white" />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-white">
+                        Your academic library
+                      </p>
+
+                      <p className="mt-1 text-xs text-white/65">
+                        Everything within reach
+                      </p>
+                    </div>
+                  </div>
+
+                  <Sparkles size={19} className="text-white/80" />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-white">
-                    Secure Student Access
-                  </p>
-                  <p className="text-[11px] text-blue-100/70">
-                    Single Sign-On (SSO) Enabled
-                  </p>
+
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-center gap-3 rounded-xl bg-white/10 p-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
+                      <BookOpen size={17} className="text-white" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white">
+                        Semester Archives
+                      </p>
+                      <p className="mt-0.5 text-xs text-white/60">
+                        Organized study materials
+                      </p>
+                    </div>
+
+                    <ArrowRight size={16} className="text-white/70" />
+                  </div>
+
+                  <div className="flex items-center gap-3 rounded-xl bg-white/10 p-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
+                      <GraduationCap size={19} className="text-white" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white">
+                        Question Bank
+                      </p>
+                      <p className="mt-0.5 text-xs text-white/60">
+                        Prepare with previous papers
+                      </p>
+                    </div>
+
+                    <ArrowRight size={16} className="text-white/70" />
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-xl bg-white/5 p-2">
-                  <p className="text-sm font-bold text-white">15k+</p>
-                  <p className="text-[10px] text-blue-100/70">Students</p>
+              {/* Trust indicator */}
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                  <ShieldCheck size={21} className="text-white" />
                 </div>
-                <div className="rounded-xl bg-white/5 p-2">
-                  <p className="text-sm font-bold text-white">40+</p>
-                  <p className="text-[10px] text-blue-100/70">Depts</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-2">
-                  <p className="text-sm font-bold text-white">24/7</p>
-                  <p className="text-[10px] text-blue-100/70">Access</p>
+
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    Your academic space
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-white/65">
+                    One community. Shared knowledge. Better learning.
+                  </p>
                 </div>
               </div>
             </div>
           </AuthWelcomePanel>
-        </div>
 
-        {/* Right Form Panel */}
-        <section className="flex items-center justify-center bg-surface p-6 sm:p-10 lg:col-span-5 xl:p-12">
-          <div className="w-full max-w-sm">
-            {/* Mobile Branding Logo */}
-            <Link
-              href="/"
-              className="mb-8 inline-flex items-center gap-3 lg:hidden"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-                <GraduationCap size={22} />
+          {/* Panel footer */}
+          <p className="mt-8 text-xs text-white/60">
+            Learn together. Achieve more.
+          </p>
+        </section>
+
+        {/* =====================================
+            RIGHT PANEL — LOGIN FORM
+        ====================================== */}
+        <section className="flex items-center justify-center bg-surface px-6 py-10 transition-colors duration-300 sm:px-10 lg:px-12 xl:px-16">
+          <div className="w-full max-w-md">
+            {/* Branding */}
+            <Link href="/" className="mb-10 inline-flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-[var(--background)] shadow-md shadow-primary/20">
+                <GraduationCap size={25} />
               </div>
+
               <span className="text-xl font-bold tracking-tight text-foreground">
                 Campus<span className="text-primary">Vault</span>
               </span>
             </Link>
 
-            {/* Header Text */}
+            {/* Welcome heading */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Welcome back
-              </h2>
-              <p className="mt-2 text-sm text-muted">
-                Please enter your details to sign in to your vault.
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-light px-3 py-1.5 text-xs font-semibold text-primary">
+                <Sparkles size={14} />
+                Your learning journey continues
+              </div>
+
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                Welcome back<span className="text-primary">.</span>
+              </h1>
+
+              <p className="mt-3 max-w-sm text-sm leading-6 text-muted">
+                Sign in to access your academic resources and pick up where you
+                left off.
               </p>
             </div>
 
-            {/* University SSO Button */}
+            {/* University ID sign-in */}
             <button
               type="button"
-              className="mb-5 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface-secondary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-border/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="group mb-6 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface-secondary px-4 py-3.5 text-sm font-semibold text-foreground transition duration-200 hover:border-primary/40 hover:bg-primary-light/50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
-                />
-              </svg>
-              Sign in with University Edu ID
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface text-primary transition-colors group-hover:border-primary/30">
+                <GraduationCap size={19} />
+              </div>
+
+              <span>Continue with University Edu ID</span>
+
+              <ArrowRight
+                size={16}
+                className="ml-auto text-muted transition-transform group-hover:translate-x-1"
+              />
             </button>
 
             {/* Divider */}
-            <div className="relative mb-6 flex items-center justify-center">
+            <div className="relative mb-6 flex items-center">
               <div className="w-full border-t border-border" />
-              <span className="absolute bg-surface px-3 text-xs uppercase tracking-wider text-muted-foreground">
-                or email
+
+              <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap bg-surface px-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Or continue with email
               </span>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Input */}
+            {/* Login form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
-                  className="mb-1.5 block text-xs font-semibold text-foreground"
+                  className="mb-2 block text-sm font-semibold text-foreground"
                 >
-                  University Email
+                  University email
                 </label>
 
-                <div className="relative flex items-center">
+                <div className="group relative">
                   <Mail
-                    size={18}
-                    className="pointer-events-none absolute left-3.5 text-muted"
+                    size={19}
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
                   />
+
                   <input
                     id="email"
                     name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="student@university.edu"
+                    placeholder="you@university.edu"
                     autoComplete="email"
                     required
-                    className="w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground transition duration-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    className="w-full rounded-xl border border-border bg-background py-3.5 pl-12 pr-4 text-sm text-foreground outline-none transition duration-200 placeholder:text-muted-foreground hover:border-border-strong focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
                 </div>
               </div>
 
-              {/* Password Input */}
+              {/* Password */}
               <div>
-                <div className="mb-1.5 flex items-center justify-between">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <label
                     htmlFor="password"
-                    className="text-xs font-semibold text-foreground"
+                    className="text-sm font-semibold text-foreground"
                   >
                     Password
                   </label>
 
                   <Link
                     href="/Auth/forgot-password"
-                    className="text-xs font-semibold text-primary transition hover:underline"
+                    className="text-xs font-semibold text-primary transition hover:text-primary-hover hover:underline"
                   >
                     Forgot password?
                   </Link>
                 </div>
 
-                <div className="relative flex items-center">
+                <div className="group relative">
                   <LockKeyhole
-                    size={18}
-                    className="pointer-events-none absolute left-3.5 text-muted"
+                    size={19}
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
                   />
+
                   <input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
+                    placeholder="Enter your password"
                     autoComplete="current-password"
                     required
-                    className="w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-11 text-sm text-foreground outline-none placeholder:text-muted-foreground transition duration-200 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    className="w-full rounded-xl border border-border bg-background py-3.5 pl-12 pr-12 text-sm text-foreground outline-none transition duration-200 placeholder:text-muted-foreground hover:border-border-strong focus:border-primary focus:ring-4 focus:ring-primary/10"
                   />
 
                   <button
@@ -193,58 +269,72 @@ export default function LoginPage() {
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
-                    className="absolute right-3.5 text-muted transition hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                   </button>
                 </div>
               </div>
 
-              {/* Remember Me Checkbox */}
-              <div className="flex items-center justify-between py-1">
+              {/* Remember me */}
+              <div className="flex items-center justify-between pt-1">
                 <label className="flex cursor-pointer items-center gap-2.5">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-border bg-surface text-primary focus:ring-primary/20"
+                    className="h-4 w-4 cursor-pointer rounded border-border bg-surface accent-primary focus-visible:ring-2 focus-visible:ring-primary/30"
                   />
-                  <span className="text-xs font-medium text-muted">
-                    Keep me signed in
-                  </span>
+
+                  <span className="text-sm text-muted">Keep me signed in</span>
                 </label>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit button */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-primary-hover active:scale-[0.99] disabled:opacity-70 focus:outline-none focus:ring-4 focus:ring-primary/20"
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-[var(--background)] shadow-lg shadow-primary/15 transition duration-200 hover:bg-primary-hover active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/25"
               >
                 {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Signing you in...</span>
+                  </>
                 ) : (
                   <>
-                    <span>Sign in to Dashboard</span>
+                    <span>Sign in to CampusVault</span>
+
                     <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-0.5"
+                      size={17}
+                      className="transition-transform duration-200 group-hover:translate-x-1"
                     />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Footer Sign Up Link */}
-            <p className="mt-8 text-center text-xs text-muted">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/Auth/register"
-                className="font-semibold text-primary hover:underline"
-              >
-                Create an account
-              </Link>
-            </p>
+            {/* Registration link */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-muted">
+                New to CampusVault?{" "}
+                <Link
+                  href="/Auth/register"
+                  className="font-semibold text-primary transition hover:text-primary-hover hover:underline"
+                >
+                  Create an account
+                </Link>
+              </p>
+            </div>
+
+            {/* Security footer */}
+            <div className="mt-8 flex items-center justify-center gap-2 border-t border-border pt-6">
+              <ShieldCheck size={15} className="text-success" />
+
+              <p className="text-xs text-muted">
+                Your academic space, securely accessible.
+              </p>
+            </div>
           </div>
         </section>
       </div>
