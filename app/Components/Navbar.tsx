@@ -19,7 +19,7 @@ export default function Navbar() {
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Archives", href: "/archives" },
-    { label: "Question Bank", href: "/question-bank" },
+    { label: "Question Bank", href: "/questionBank" },
     { label: "Faculty", href: "/faculty" },
   ];
 
