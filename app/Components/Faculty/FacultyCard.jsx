@@ -121,8 +121,8 @@ export default function FacultyCard({ faculty, upvoted = false, onUpvote }) {
                     aria-pressed={upvoted}
                     aria-label={`${upvoteCount} upvotes`}
                     className={`flex items-center gap-1 rounded-xl border px-3 py-1.5 text-sm font-medium transition disabled:cursor-default ${upvoted
-                            ? "border-primary bg-primary text-white"
-                            : "border-border bg-background text-foreground enabled:hover:border-primary"
+                        ? "border-primary bg-primary text-white"
+                        : "border-border bg-background text-foreground enabled:hover:border-primary"
                         }`}
                 >
                     <ArrowBigUp size={18} className={upvoted ? "fill-white" : ""} />
@@ -131,7 +131,7 @@ export default function FacultyCard({ faculty, upvoted = false, onUpvote }) {
 
                 <Link
                     href={href}
-                    className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-hover"
+                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
                 >
                     View reviews
                 </Link>
