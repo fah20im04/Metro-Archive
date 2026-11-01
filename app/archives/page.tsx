@@ -1,7 +1,12 @@
 import React from "react";
+import Archive from "../Components/Archive";
 
 const page = () => {
-  return <div>this is archive</div>;
+  return (
+    <div>
+      <Archive />
+    </div>
+  );
 };
 
 export default page;
