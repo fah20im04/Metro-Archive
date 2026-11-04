@@ -85,7 +85,7 @@ const Archive = () => {
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
-              Explore your university's academic collections. Find notes,
+              Explore your university&apos;s academic collections. Find notes,
               assignments, lab reports and previous questions shared by students
               from your batch.
             </p>
