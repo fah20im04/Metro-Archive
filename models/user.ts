@@ -11,8 +11,8 @@ export interface IUser {
   email: string;
   passwordHash: string;
   role: UserRole;
-  departmentId?: Types.ObjectId;
-  batch?: string;
+  departmentId: Types.ObjectId | null;
+  batch: string | null;
   accountStatus: AccountStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -73,7 +73,7 @@ const UserSchema = new Schema<IUser>(
     accountStatus: {
       type: String,
       enum: ["pending", "active", "suspended"],
-      default: "pending",
+      default: "active",
       required: true,
     },
   },
