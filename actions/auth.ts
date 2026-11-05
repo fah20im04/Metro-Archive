@@ -17,6 +17,7 @@ import {
   SESSION_COOKIE,
   sessionCookieOptions,
   createSessionToken,
+  verifySessionToken,
 } from "@/lib/auth";
 
 // ----------------------------------------
@@ -244,3 +245,69 @@ export async function logoutAction(): Promise<ActionResponse> {
     };
   }
 }
+
+// ----------------------------------------
+// CURRENT USER ACTION
+// ----------------------------------------
+
+
+export async function getCurrentUserAction() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE)?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        user: null,
+      };
+    }
+
+    const session = await verifySessionToken(token);
+
+    if (!session?.userId) {
+      return {
+        success: false,
+        user: null,
+      };
+    }
+
+    await connectDB();
+
+    const user = await User.findById(session.userId)
+      .select(
+        "name universityId email role departmentId batch accountStatus createdAt"
+      )
+      .lean();
+
+    if (!user || user.accountStatus !== "active") {
+      return {
+        success: false,
+        user: null,
+      };
+    }
+
+    return {
+      success: true,
+      user: {
+        id: user._id.toString(),
+        name: user.name,
+        universityId: user.universityId,
+        email: user.email,
+        role: user.role,
+        departmentId: user.departmentId?.toString() ?? null,
+        batch: user.batch ?? null,
+        accountStatus: user.accountStatus,
+        createdAt: user.createdAt.toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error("Get current user action error:", error);
+
+    return {
+      success: false,
+      user: null,
+    };
+  }
+}
+
