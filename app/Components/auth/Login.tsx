@@ -26,6 +26,9 @@ export default function Login() {
 
   const [state, formAction, isPending] = useActionState(loginAction, null);
 
+  // University ID validation
+  const universityIdRegex = /^\d{3}-\d{3}-\d{3}$/;
+
   useEffect(() => {
     if (state?.success) {
       router.replace("/");
@@ -90,10 +93,19 @@ export default function Login() {
                 placeholder="111-111-111"
                 autoComplete="username"
                 required
-                maxLength={50}
+                pattern="\d{3}-\d{3}-\d{3}"
+                maxLength={11}
+                title="University ID must follow the format XXX-XXX-XXX"
                 className="w-full rounded-xl border border-default bg-surface py-3.5 pl-11 pr-4 text-sm text-foreground outline-none transition duration-200 hover:border-strong focus:border-primary"
               />
             </div>
+
+            {universityId.length > 0 &&
+              !universityIdRegex.test(universityId) && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  Valid University ID Format (111-111-111).
+                </p>
+              )}
           </div>
 
           {/* Password Field */}
@@ -195,7 +207,7 @@ export default function Login() {
                 <span>Access Archive</span>
                 <ArrowRight
                   size={16}
-                className="transition-transform duration-200 group-hover:translate-x-1"
+                  className="transition-transform duration-200 group-hover:translate-x-1"
                 />
               </>
             )}
