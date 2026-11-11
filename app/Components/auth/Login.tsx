@@ -87,7 +87,7 @@ export default function Login() {
                 type="text"
                 value={universityId}
                 onChange={(e) => setUniversityId(e.target.value)}
-                placeholder="Enter your university ID"
+                placeholder="111-111-111"
                 autoComplete="username"
                 required
                 maxLength={50}
@@ -183,7 +183,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isPending}
-            className="btn-primary group mt-2 w-full py-3.5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex mx-auto items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
           >
             {isPending ? (
               <>
@@ -195,7 +195,7 @@ export default function Login() {
                 <span>Access Archive</span>
                 <ArrowRight
                   size={16}
-                  className="transition-transform duration-200 group-hover:translate-x-1"
+                className="transition-transform duration-200 group-hover:translate-x-1"
                 />
               </>
             )}
