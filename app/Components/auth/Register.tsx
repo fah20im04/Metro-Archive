@@ -39,6 +39,7 @@ export default function Register() {
     batch: "",
     password: "",
     confirmPassword: "",
+    department: ""
   });
 
   // University ID validation
@@ -238,16 +239,35 @@ export default function Register() {
               </h2>
             </div>
 
-            {/* Batch */}
-            <div>
-              <label htmlFor="batch" className={labelClass}>
-                Batch / Intake
-                <span className="ml-1 text-muted normal-case tracking-normal">
-                  (Optional)
-                </span>
-              </label>
-
+            {/* Department and Batch */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="relative">
+                <label htmlFor="batch" className={labelClass}>
+                  Department Name
+                </label>
+                <CalendarDays
+                  size={18}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+
+                <input
+                  id="department"
+                  name="department"
+                  type="text"
+                  value={formData.department}
+                  onChange={handleChange}
+                  placeholder="Department Initials (CSE, EEE)"
+                  maxLength={3}
+                  className={inputClass}
+                />
+              </div>
+              <div className="relative">
+                <label htmlFor="batch" className={labelClass}>
+                  Batch
+                  <span className="ml-1 text-muted normal-case tracking-normal">
+                    (Optional)
+                  </span>
+                </label>
                 <CalendarDays
                   size={18}
                   className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -259,8 +279,8 @@ export default function Register() {
                   type="text"
                   value={formData.batch}
                   onChange={handleChange}
-                  placeholder="e.g. 60th"
-                  maxLength={50}
+                  placeholder="Batch"
+                  maxLength={3}
                   className={inputClass}
                 />
               </div>
@@ -452,7 +472,7 @@ export default function Register() {
             Your university credentials are encrypted and verified securely.
           </span>
         </div>
-      </div>
-    </main>
+      </div >
+    </main >
   );
 }
