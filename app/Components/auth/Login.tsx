@@ -11,7 +11,6 @@ import {
   EyeOff,
   ArrowRight,
   Loader2,
-  Sparkles,
 } from "lucide-react";
 
 import { loginAction } from "@/actions/auth";
@@ -47,18 +46,13 @@ export default function Login() {
         {/* Top Header & Branding */}
         <div className="flex flex-col items-center text-center">
           <Link href="/" className="group mb-4 inline-flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md transition-transform duration-300 group-hover:scale-105">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md transition-transform duration-300 group-hover:scale-105">
               <GraduationCap size={26} />
             </div>
           </Link>
 
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-xs font-semibold text-accent">
-            <Sparkles size={13} />
-            University Archive Portal
-          </div>
-
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome Back<span className="text-accent">.</span>
+            Welcome Back<span className="text-blue-600">.</span>
           </h1>
 
           <p className="mt-2 text-xs text-muted sm:text-sm">
