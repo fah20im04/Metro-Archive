@@ -41,6 +41,9 @@ export default function Register() {
     confirmPassword: "",
   });
 
+  // University ID validation
+  const universityIdRegex = /^\d{3}-\d{3}-\d{3}$/;
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
@@ -151,13 +154,23 @@ export default function Register() {
                     type="text"
                     value={formData.universityId}
                     onChange={handleChange}
-                    placeholder="Enter your official university ID"
+                    placeholder="Official university ID (111-111-111)"
                     autoComplete="off"
                     required
-                    maxLength={50}
+                    pattern="\d{3}-\d{3}-\d{3}"
+                    maxLength={11}
+                    title="University ID must follow the format 111-111-111"
                     className={inputClass}
                   />
                 </div>
+
+                {/* University ID Validator */}
+                {formData.universityId.length > 0 &&
+                  !universityIdRegex.test(formData.universityId) && (
+                    <p className="mt-1.5 text-xs text-red-500">
+                      Valid University ID Format (111-111-111).
+                    </p>
+                  )}
               </div>
 
               {/* Name */}
@@ -369,11 +382,10 @@ export default function Register() {
           {(clientError || state?.message) && (
             <div
               role="alert"
-              className={`rounded-xl border px-4 py-3 text-sm ${
-                state?.success
-                  ? "border-primary/30 bg-primary/10 text-primary"
-                  : "border-accent/30 bg-accent-light text-accent"
-              }`}
+              className={`rounded-xl border px-4 py-3 text-sm ${state?.success
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : "border-accent/30 bg-accent-light text-accent"
+                }`}
             >
               {clientError || state?.message}
 
