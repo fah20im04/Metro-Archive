@@ -34,18 +34,19 @@ type ActionResponse = {
 // REGISTER ACTION
 // ----------------------------------------
 
+
 export async function registerAction(
   _prevState: ActionResponse | null,
   formData: FormData
 ): Promise<ActionResponse> {
   try {
-    // Validate registration data
+    // 1. Validate registration data using Zod
     const validated = registerSchema.safeParse({
       name: formData.get("name"),
       universityId: formData.get("universityId"),
       email: formData.get("email"),
       password: formData.get("password"),
-      departmentId: formData.get("departmentId") || undefined,
+      departmentName: formData.get("departmentName"),
       batch: formData.get("batch") || undefined,
     });
 
@@ -59,31 +60,17 @@ export async function registerAction(
 
     const data = validated.data;
 
+    // 2. Connect to MongoDB
     await connectDB();
 
-    // Normalize university ID
-    const universityId = data.universityId.toUpperCase();
+    // 3. Normalize user information
+    const universityId = data.universityId.trim().toUpperCase();
+    const email = data.email.trim().toLowerCase();
+    const departmentName = data.departmentName.trim().toUpperCase();
 
-    // Validate department ID if provided
-    let departmentId: Types.ObjectId | null = null;
-
-    if (data.departmentId) {
-      if (!Types.ObjectId.isValid(data.departmentId)) {
-        return {
-          success: false,
-          message: "Invalid department selected.",
-        };
-      }
-
-      departmentId = new Types.ObjectId(data.departmentId);
-    }
-
-    // Check for duplicate university ID or email
+    // 4. Check for existing University ID or email
     const existingUser = await User.findOne({
-      $or: [
-        { universityId },
-        { email: data.email },
-      ],
+      $or: [{ universityId }, { email }],
     });
 
     if (existingUser) {
@@ -94,21 +81,22 @@ export async function registerAction(
       };
     }
 
-    // Hash password
+    // 5. Hash password
     const passwordHash = await bcrypt.hash(data.password, 12);
 
-    // Create student account
+    // 6. Create student account
     await User.create({
-      name: data.name,
+      name: data.name.trim(),
       universityId,
-      email: data.email,
+      email,
       passwordHash,
       role: "student",
-      departmentId,
-      batch: data.batch || null,
+      departmentName,
+      batch: data.batch?.trim() || null,
       accountStatus: "active",
     });
 
+    // 7. Return success response
     return {
       success: true,
       message: "Registration successful. You can now log in.",
@@ -135,6 +123,7 @@ export async function registerAction(
     };
   }
 }
+
 
 // ----------------------------------------
 // LOGIN ACTION

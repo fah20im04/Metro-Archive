@@ -25,8 +25,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, universityId, email, password, batch } =
-      validation.data;
+    const {
+      name,
+      universityId,
+      email,
+      password,
+      batch,
+      departmentName,
+    } = validation.data;
 
     // 3. Connect to MongoDB
     await connectDB();
@@ -66,6 +72,7 @@ export async function POST(request: NextRequest) {
       universityId: normalizedUniversityId,
       email,
       passwordHash,
+      departmentName,
       batch,
       role: "student",
       accountStatus: "active",

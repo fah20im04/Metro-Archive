@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import "./globals.css";
 
 import Navbar from "./Components/Navbar";
 import ThemeProvider from "./Components/ThemeProvider";
-
 
 export const metadata: Metadata = {
   title: "CampusVault | University Archive",
@@ -17,7 +16,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          <Navbar />
+          <Suspense
+            fallback={
+              <div className="h-16 w-full border-b border-default bg-background" />
+            }
+          >
+            <Navbar />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>

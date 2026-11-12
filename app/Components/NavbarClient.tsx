@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -39,7 +39,19 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
   const [loggingOut, setLoggingOut] = useState(false);
 
   const { resolvedTheme, setTheme } = useTheme();
+
+  const isDark = resolvedTheme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
   const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isLoggedIn = Boolean(currentUser);
 
@@ -54,11 +66,11 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     { label: "Faculty", href: "/faculty" },
   ];
 
-  const isDark = resolvedTheme === "dark";
+  // const isDark = resolvedTheme === "dark";
 
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
+  // const toggleTheme = () => {
+  //   setTheme(isDark ? "light" : "dark");
+  // };
   const handleLogout = async () => {
     if (loggingOut) return;
 
@@ -130,11 +142,31 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-            title={`Switch to ${isDark ? "light" : "dark"} mode`}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground transition hover:bg-surface-secondary"
+            aria-label={
+              mounted
+                ? isDark
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Change theme"
+            }
+            title={
+              mounted
+                ? isDark
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Change theme"
+            }
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface transition-colors"
           >
-            {isDark ? <Sun size={19} /> : <Moon size={19} />}
+            {mounted ? (
+              isDark ? (
+                <Sun size={19} />
+              ) : (
+                <Moon size={19} />
+              )
+            ) : (
+              <span className="h-[19px] w-[19px]" />
+            )}
           </button>
 
           {currentUser ? (
