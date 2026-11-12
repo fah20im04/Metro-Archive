@@ -11,7 +11,6 @@ import {
   EyeOff,
   ArrowRight,
   Loader2,
-  Sparkles,
 } from "lucide-react";
 
 import { loginAction } from "@/actions/auth";
@@ -25,6 +24,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const [state, formAction, isPending] = useActionState(loginAction, null);
+
+  // University ID validation
+  const universityIdRegex = /^\d{3}-\d{3}-\d{3}$/;
 
   useEffect(() => {
     if (state?.success) {
@@ -44,18 +46,13 @@ export default function Login() {
         {/* Top Header & Branding */}
         <div className="flex flex-col items-center text-center">
           <Link href="/" className="group mb-4 inline-flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md transition-transform duration-300 group-hover:scale-105">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md transition-transform duration-300 group-hover:scale-105">
               <GraduationCap size={26} />
             </div>
           </Link>
 
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-xs font-semibold text-accent">
-            <Sparkles size={13} />
-            University Archive Portal
-          </div>
-
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome Back<span className="text-accent">.</span>
+            Welcome Back<span className="text-blue-600">.</span>
           </h1>
 
           <p className="mt-2 text-xs text-muted sm:text-sm">
@@ -87,13 +84,22 @@ export default function Login() {
                 type="text"
                 value={universityId}
                 onChange={(e) => setUniversityId(e.target.value)}
-                placeholder="Enter your university ID"
+                placeholder="111-111-111"
                 autoComplete="username"
                 required
-                maxLength={50}
+                pattern="\d{3}-\d{3}-\d{3}"
+                maxLength={11}
+                title="University ID must follow the format XXX-XXX-XXX"
                 className="w-full rounded-xl border border-default bg-surface py-3.5 pl-11 pr-4 text-sm text-foreground outline-none transition duration-200 hover:border-strong focus:border-primary"
               />
             </div>
+
+            {universityId.length > 0 &&
+              !universityIdRegex.test(universityId) && (
+                <p className="mt-1.5 text-xs text-red-500">
+                  Valid University ID Format (111-111-111).
+                </p>
+              )}
           </div>
 
           {/* Password Field */}
@@ -183,7 +189,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isPending}
-            className="btn-primary group mt-2 w-full py-3.5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex mx-auto items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
           >
             {isPending ? (
               <>
