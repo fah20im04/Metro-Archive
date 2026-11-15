@@ -284,7 +284,7 @@ export async function getCurrentUserAction() {
         universityId: user.universityId,
         email: user.email,
         role: user.role,
-        departmentId: user.departmentId?.toString() ?? null,
+        departmentId: user.departmentName?.toString() ?? null,
         batch: user.batch ?? null,
         accountStatus: user.accountStatus,
         createdAt: user.createdAt.toISOString(),

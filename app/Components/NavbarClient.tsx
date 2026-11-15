@@ -66,11 +66,6 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     { label: "Faculty", href: "/faculty" },
   ];
 
-  // const isDark = resolvedTheme === "dark";
-
-  // const toggleTheme = () => {
-  //   setTheme(isDark ? "light" : "dark");
-  // };
   const handleLogout = async () => {
     if (loggingOut) return;
 
@@ -101,6 +96,9 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     setProfileOpen(false);
   };
 
+  // const dashboard = isLoggedIn?.role === "admin" ? "/admin/dashboard" : "/dashboard";
+  const dashboard = "/dashboard";
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 text-foreground backdrop-blur-lg transition-colors">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
@@ -115,7 +113,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           </div>
 
           <span className="text-xl font-bold tracking-tight text-foreground">
-            Campus<span className="text-primary">Vault</span>
+            MU<span className="text-primary">Archive</span>
           </span>
         </Link>
 
@@ -199,7 +197,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   </div>
 
                   <div className="my-3 border-t border-border" />
-
+                  <Link href={dashboard}>Dashboard</Link>
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -296,6 +294,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   </div>
 
                   {/* Mobile Logout */}
+                  <Link href={dashboard}>Dashboard</Link>
                   <button
                     type="button"
                     onClick={handleLogout}

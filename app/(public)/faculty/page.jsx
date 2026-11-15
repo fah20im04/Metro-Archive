@@ -1,6 +1,6 @@
 import { log } from "console";
-import FacultySearch from "../Components/Faculty/FacultySearch";
-import FacultyCardContainer from "../Components/Faculty/Facultycardcontainer";
+import FacultySearch from "../../Components/Faculty/FacultySearch";
+import FacultyCardContainer from "../../Components/Faculty/Facultycardcontainer";
 
 import { getFacultyAction } from "@/actions/faculty";
 
