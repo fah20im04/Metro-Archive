@@ -11,7 +11,7 @@ export interface IUser {
   email: string;
   passwordHash: string;
   role: UserRole;
-  departmentId: Types.ObjectId | null;
+  departmentName: string | null;
   batch: string | null;
   accountStatus: AccountStatus;
   createdAt: Date;
@@ -58,9 +58,10 @@ const UserSchema = new Schema<IUser>(
       required: true,
     },
 
-    departmentId: {
-      type: Schema.Types.ObjectId,
-      ref: "Department",
+    departmentName: {
+      type: String,
+      trim: true,
+      uppercase: true,
       default: null,
     },
 

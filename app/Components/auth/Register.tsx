@@ -3,17 +3,17 @@
 import {
   useState,
   useActionState,
+  startTransition,
   type ChangeEvent,
   type FormEvent,
 } from "react";
+
 import Link from "next/link";
+
 import {
   GraduationCap,
   UserRound,
   Mail,
-  LockKeyhole,
-  Eye,
-  EyeOff,
   IdCard,
   CalendarDays,
   ArrowRight,
@@ -24,28 +24,46 @@ import {
 
 import { registerAction } from "@/actions/auth";
 
+import FormField from "../Form/FormField";
+import PasswordField from "../Form/PasswordField";
+import { DEPARTMENTS } from "../../data/auth";
+
+// Remove duplicate department values, if any.
+const UNIQUE_DEPARTMENTS = Array.from(
+  new Map(
+    DEPARTMENTS.map((department) => [department.value, department]),
+  ).values(),
+);
+
+// Initial form values
+const INITIAL_FORM_DATA = {
+  universityId: "",
+  name: "",
+  email: "",
+  department: "",
+  batch: "",
+  password: "",
+  confirmPassword: "",
+};
+
 export default function Register() {
+  // Password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Form states
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [clientError, setClientError] = useState("");
 
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+
+  // Server action state
   const [state, formAction, isPending] = useActionState(registerAction, null);
 
-  const [formData, setFormData] = useState({
-    universityId: "",
-    name: "",
-    email: "",
-    batch: "",
-    password: "",
-    confirmPassword: "",
-    department: ""
-  });
-
-  // University ID validation
-  const universityIdRegex = /^\d{3}-\d{3}-\d{3}$/;
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  // Handle input changes
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = event.target;
 
     setFormData((previous) => ({
@@ -56,15 +74,13 @@ export default function Register() {
     setClientError("");
   };
 
+  // Handle form submission
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setClientError("");
 
-    if (formData.password.length < 8) {
-      setClientError("Your password must contain at least 8 characters.");
-      return;
-    }
-
+    // Password confirmation is a separate UI field.
+    // Password length/strength validation belongs in Zod.
     if (formData.password !== formData.confirmPassword) {
       setClientError("Passwords do not match. Please try again.");
       return;
@@ -75,31 +91,29 @@ export default function Register() {
       return;
     }
 
-    // Send only fields accepted by the backend.
+    // Prepare data using the exact backend field names.
     const submissionData = new FormData();
 
-    submissionData.append("universityId", formData.universityId);
-    submissionData.append("name", formData.name);
-    submissionData.append("email", formData.email);
+    submissionData.append("universityId", formData.universityId.trim());
+    submissionData.append("name", formData.name.trim());
+    submissionData.append("email", formData.email.trim());
     submissionData.append("password", formData.password);
+    submissionData.append("departmentName", formData.department);
 
-    if (formData.batch.trim()) {
-      submissionData.append("batch", formData.batch.trim());
-    }
+    // Batch is optional.
+    submissionData.append("batch", formData.batch.trim());
 
-    formAction(submissionData);
+    // Call useActionState inside a transition.
+    startTransition(() => {
+      formAction(submissionData);
+    });
   };
-
-  const inputClass =
-    "w-full rounded-xl border border-default bg-surface py-3.5 pl-11 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/80 hover:border-strong focus:border-primary focus:ring-4 focus:ring-primary/10";
-
-  const labelClass =
-    "mb-2 block text-xs font-semibold uppercase tracking-wider text-muted";
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12 transition-colors duration-200 sm:px-6 lg:px-8">
-      {/* Decorative background */}
+      {/* Decorative Background */}
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-primary/10 blur-[100px]" />
+
       <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-accent/10 blur-[100px]" />
 
       {/* Main Register Card */}
@@ -128,8 +142,8 @@ export default function Register() {
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Personal Information */}
-          <div className="space-y-4">
+          {/* 1. PERSONAL INFORMATION */}
+          <section className="space-y-4">
             <div className="border-b border-default pb-2">
               <h2 className="text-xs font-bold uppercase tracking-widest text-primary">
                 1. Personal Information
@@ -139,156 +153,86 @@ export default function Register() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* University ID */}
               <div className="sm:col-span-2">
-                <label htmlFor="universityId" className={labelClass}>
-                  University ID <span className="text-accent">*</span>
-                </label>
-
-                <div className="relative">
-                  <IdCard
-                    size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-
-                  <input
-                    id="universityId"
-                    name="universityId"
-                    type="text"
-                    value={formData.universityId}
-                    onChange={handleChange}
-                    placeholder="Official university ID (111-111-111)"
-                    autoComplete="off"
-                    required
-                    pattern="\d{3}-\d{3}-\d{3}"
-                    maxLength={11}
-                    title="University ID must follow the format 111-111-111"
-                    className={inputClass}
-                  />
-                </div>
-
-                {/* University ID Validator */}
-                {formData.universityId.length > 0 &&
-                  !universityIdRegex.test(formData.universityId) && (
-                    <p className="mt-1.5 text-xs text-red-500">
-                      Valid University ID Format (111-111-111).
-                    </p>
-                  )}
+                <FormField
+                  id="universityId"
+                  label="University ID"
+                  value={formData.universityId}
+                  placeholder="Official university ID"
+                  icon={IdCard}
+                  onChange={handleChange}
+                  required
+                  maxLength={11}
+                  autoComplete="off"
+                />
               </div>
 
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className={labelClass}>
-                  Full Name <span className="text-accent">*</span>
-                </label>
-
-                <div className="relative">
-                  <UserRound
-                    size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Your full name"
-                    autoComplete="name"
-                    required
-                    minLength={2}
-                    maxLength={100}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
+              {/* Full Name */}
+              <FormField
+                id="name"
+                label="Full Name"
+                value={formData.name}
+                placeholder="Your full name"
+                icon={UserRound}
+                onChange={handleChange}
+                required
+                minLength={2}
+                maxLength={100}
+                autoComplete="name"
+              />
 
               {/* Email */}
-              <div>
-                <label htmlFor="email" className={labelClass}>
-                  Email Address <span className="text-accent">*</span>
-                </label>
-
-                <div className="relative">
-                  <Mail
-                    size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    required
-                    maxLength={254}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
+              <FormField
+                id="email"
+                label="Email Address"
+                value={formData.email}
+                placeholder="you@example.com"
+                icon={Mail}
+                type="email"
+                onChange={handleChange}
+                required
+                maxLength={254}
+                autoComplete="email"
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Academic Information */}
-          <div className="space-y-4">
+          {/* 2. ACADEMIC INFORMATION */}
+          <section className="space-y-4">
             <div className="border-b border-default pb-2">
               <h2 className="text-xs font-bold uppercase tracking-widest text-primary">
                 2. Academic Information
               </h2>
             </div>
 
-            {/* Department and Batch */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="relative">
-                <label htmlFor="batch" className={labelClass}>
-                  Department Name
-                </label>
-                <CalendarDays
-                  size={18}
-                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* Department */}
+              <FormField
+                id="department"
+                label="Department Name"
+                value={formData.department}
+                placeholder="Select Department"
+                icon={CalendarDays}
+                onChange={handleChange}
+                required
+                options={UNIQUE_DEPARTMENTS}
+              />
 
-                <input
-                  id="department"
-                  name="department"
-                  type="text"
-                  value={formData.department}
-                  onChange={handleChange}
-                  placeholder="Department Initials (CSE, EEE)"
-                  maxLength={3}
-                  className={inputClass}
-                />
-              </div>
-              <div className="relative">
-                <label htmlFor="batch" className={labelClass}>
-                  Batch
-                  <span className="ml-1 text-muted normal-case tracking-normal">
-                    (Optional)
-                  </span>
-                </label>
-                <CalendarDays
-                  size={18}
-                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                />
-
-                <input
-                  id="batch"
-                  name="batch"
-                  type="text"
-                  value={formData.batch}
-                  onChange={handleChange}
-                  placeholder="Batch"
-                  maxLength={3}
-                  className={inputClass}
-                />
-              </div>
+              {/* Batch */}
+              <FormField
+                id="batch"
+                label="Batch"
+                value={formData.batch}
+                placeholder="Batch"
+                icon={CalendarDays}
+                onChange={handleChange}
+                maxLength={3}
+                optional
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Account Security */}
-          <div className="space-y-4">
+          {/* 3. ACCOUNT SECURITY */}
+          <section className="space-y-4">
             <div className="border-b border-default pb-2">
               <h2 className="text-xs font-bold uppercase tracking-widest text-primary">
                 3. Account Security
@@ -297,92 +241,30 @@ export default function Register() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Password */}
-              <div>
-                <label htmlFor="password" className={labelClass}>
-                  Password <span className="text-accent">*</span>
-                </label>
-
-                <div className="relative">
-                  <LockKeyhole
-                    size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="At least 8 chars"
-                    autoComplete="new-password"
-                    minLength={8}
-                    maxLength={72}
-                    required
-                    className={`${inputClass} pr-12`}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                id="password"
+                label="Password"
+                value={formData.password}
+                placeholder="Enter your password"
+                visible={showPassword}
+                onToggle={() => setShowPassword((previous) => !previous)}
+                onChange={handleChange}
+              />
 
               {/* Confirm Password */}
-              <div>
-                <label htmlFor="confirmPassword" className={labelClass}>
-                  Confirm Password <span className="text-accent">*</span>
-                </label>
-
-                <div className="relative">
-                  <LockKeyhole
-                    size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Repeat password"
-                    autoComplete="new-password"
-                    minLength={8}
-                    maxLength={72}
-                    required
-                    className={`${inputClass} pr-12`}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    aria-label={
-                      showConfirmPassword
-                        ? "Hide confirm password"
-                        : "Show confirm password"
-                    }
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
-                  </button>
-                </div>
-              </div>
+              <PasswordField
+                id="confirmPassword"
+                label="Confirm Password"
+                value={formData.confirmPassword}
+                placeholder="Repeat password"
+                visible={showConfirmPassword}
+                onToggle={() => setShowConfirmPassword((previous) => !previous)}
+                onChange={handleChange}
+              />
             </div>
-          </div>
+          </section>
 
-          {/* Terms Agreement */}
+          {/* TERMS AGREEMENT */}
           <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-default bg-surface-secondary/50 p-4">
             <input
               id="terms"
@@ -398,14 +280,15 @@ export default function Register() {
             </span>
           </label>
 
-          {/* Error / Success Messages */}
+          {/* ERROR / SUCCESS MESSAGES */}
           {(clientError || state?.message) && (
             <div
               role="alert"
-              className={`rounded-xl border px-4 py-3 text-sm ${state?.success
-                ? "border-primary/30 bg-primary/10 text-primary"
-                : "border-accent/30 bg-accent-light text-accent"
-                }`}
+              className={`rounded-xl border px-4 py-3 text-sm ${
+                state?.success
+                  ? "border-primary/30 bg-primary/10 text-primary"
+                  : "border-accent/30 bg-accent-light text-accent"
+              }`}
             >
               {clientError || state?.message}
 
@@ -431,7 +314,7 @@ export default function Register() {
             </div>
           )}
 
-          {/* Submit Button */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={isPending || state?.success}
@@ -468,11 +351,12 @@ export default function Register() {
         {/* Security Note */}
         <div className="mt-6 flex items-center justify-center gap-2 text-center text-xs text-muted">
           <ShieldCheck size={14} className="shrink-0 text-primary" />
+
           <span>
             Your university credentials are encrypted and verified securely.
           </span>
         </div>
-      </div >
-    </main >
+      </div>
+    </main>
   );
 }

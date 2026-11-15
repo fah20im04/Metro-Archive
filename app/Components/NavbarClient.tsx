@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -39,7 +39,19 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
   const [loggingOut, setLoggingOut] = useState(false);
 
   const { resolvedTheme, setTheme } = useTheme();
+
+  const isDark = resolvedTheme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
   const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isLoggedIn = Boolean(currentUser);
 
@@ -54,11 +66,6 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     { label: "Faculty", href: "/faculty" },
   ];
 
-  const isDark = resolvedTheme === "dark";
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
   const handleLogout = async () => {
     if (loggingOut) return;
 
@@ -89,6 +96,9 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     setProfileOpen(false);
   };
 
+  // const dashboard = isLoggedIn?.role === "admin" ? "/admin/dashboard" : "/dashboard";
+  const dashboard = "/dashboard";
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 text-foreground backdrop-blur-lg transition-colors">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
@@ -103,7 +113,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           </div>
 
           <span className="text-xl font-bold tracking-tight text-foreground">
-            Campus<span className="text-primary">Vault</span>
+            MU<span className="text-primary">Archive</span>
           </span>
         </Link>
 
@@ -130,11 +140,31 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-            title={`Switch to ${isDark ? "light" : "dark"} mode`}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground transition hover:bg-surface-secondary"
+            aria-label={
+              mounted
+                ? isDark
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Change theme"
+            }
+            title={
+              mounted
+                ? isDark
+                  ? "Switch to light mode"
+                  : "Switch to dark mode"
+                : "Change theme"
+            }
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface transition-colors"
           >
-            {isDark ? <Sun size={19} /> : <Moon size={19} />}
+            {mounted ? (
+              isDark ? (
+                <Sun size={19} />
+              ) : (
+                <Moon size={19} />
+              )
+            ) : (
+              <span className="h-[19px] w-[19px]" />
+            )}
           </button>
 
           {currentUser ? (
@@ -167,7 +197,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   </div>
 
                   <div className="my-3 border-t border-border" />
-
+                  <Link href={dashboard}>Dashboard</Link>
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -264,6 +294,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   </div>
 
                   {/* Mobile Logout */}
+                  <Link href={dashboard}>Dashboard</Link>
                   <button
                     type="button"
                     onClick={handleLogout}
