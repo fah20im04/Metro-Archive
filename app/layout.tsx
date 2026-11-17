@@ -5,7 +5,7 @@ import "./globals.css";
 import ThemeProvider from "./Components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "CampusVault | University Archive",
+  title: "MUArchive | University Archive",
   description:
     "Explore university notes, previous question papers, lab reports, and faculty profiles in one place.",
 };
