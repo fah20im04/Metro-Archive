@@ -34,26 +34,24 @@ type NavbarClientProps = {
 };
 
 export default function NavbarClient({ currentUser }: NavbarClientProps) {
+  const router = useRouter();
+
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const { resolvedTheme, setTheme } = useTheme();
-
-  const isDark = resolvedTheme === "dark";
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
-  const router = useRouter();
-
-  const [mounted, setMounted] = useState(false);
-
+  // Wait until the component mounts before reading the actual theme.
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const isDark = mounted && resolvedTheme === "dark";
   const isLoggedIn = Boolean(currentUser);
+
+  const dashboard = "/dashboard";
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -66,6 +64,20 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     { label: "Faculty", href: "/faculty" },
   ];
 
+  // Theme toggle
+  const toggleTheme = () => {
+    if (!mounted) return;
+
+    setTheme(isDark ? "light" : "dark");
+  };
+
+  // Close navigation menus
+  const closeMenus = () => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+  };
+
+  // Logout
   const handleLogout = async () => {
     if (loggingOut) return;
 
@@ -79,8 +91,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
         return;
       }
 
-      setProfileOpen(false);
-      setMenuOpen(false);
+      closeMenus();
 
       router.replace("/");
       router.refresh();
@@ -91,13 +102,33 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     }
   };
 
-  const closeMenus = () => {
-    setMenuOpen(false);
-    setProfileOpen(false);
-  };
-
-  // const dashboard = isLoggedIn?.role === "admin" ? "/admin/dashboard" : "/dashboard";
-  const dashboard = "/dashboard";
+  // Reusable theme button
+  const ThemeToggle = () => (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      disabled={!mounted}
+      aria-label={
+        !mounted
+          ? "Change theme"
+          : `Switch to ${isDark ? "light" : "dark"} mode`
+      }
+      title={
+        !mounted
+          ? "Change theme"
+          : `Switch to ${isDark ? "light" : "dark"} mode`
+      }
+      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground transition-colors hover:bg-surface-secondary disabled:cursor-default"
+    >
+      {!mounted ? (
+        <span className="h-[19px] w-[19px]" />
+      ) : isDark ? (
+        <Sun size={19} />
+      ) : (
+        <Moon size={19} />
+      )}
+    </button>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 text-foreground backdrop-blur-lg transition-colors">
@@ -136,36 +167,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
 
         {/* Desktop Actions */}
         <div className="hidden items-center gap-3 sm:flex">
-          {/* Theme Toggle */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={
-              mounted
-                ? isDark
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-                : "Change theme"
-            }
-            title={
-              mounted
-                ? isDark
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-                : "Change theme"
-            }
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface transition-colors"
-          >
-            {mounted ? (
-              isDark ? (
-                <Sun size={19} />
-              ) : (
-                <Moon size={19} />
-              )
-            ) : (
-              <span className="h-[19px] w-[19px]" />
-            )}
-          </button>
+          <ThemeToggle />
 
           {currentUser ? (
             /* Profile Dropdown */
@@ -181,33 +183,50 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-border bg-background p-4 shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <UserCircle size={32} className="shrink-0 text-primary" />
-
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {currentUser.name}
-                      </p>
-
-                      <p className="truncate text-xs text-muted">
-                        {currentUser.universityId}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="my-3 border-t border-border" />
-                  <Link href={dashboard}>Dashboard</Link>
+                <>
                   <button
                     type="button"
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-950/30"
-                  >
-                    <LogOut size={17} />
-                    {loggingOut ? "Logging out..." : "Log out"}
-                  </button>
-                </div>
+                    aria-label="Close profile menu"
+                    onClick={() => setProfileOpen(false)}
+                    className="fixed inset-0 z-40 cursor-default"
+                  />
+
+                  <div className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-border bg-background p-4 shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <UserCircle size={32} className="shrink-0 text-primary" />
+
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {currentUser.name}
+                        </p>
+
+                        <p className="truncate text-xs text-muted">
+                          {currentUser.universityId}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="my-3 border-t border-border" />
+
+                    <Link
+                      href={dashboard}
+                      onClick={() => setProfileOpen(false)}
+                      className="block rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition hover:bg-surface-secondary"
+                    >
+                      Dashboard
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      disabled={loggingOut}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-red-950/30"
+                    >
+                      <LogOut size={17} />
+                      {loggingOut ? "Logging out..." : "Log out"}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           ) : (
@@ -233,15 +252,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
 
         {/* Mobile Actions */}
         <div className="flex items-center gap-2 sm:hidden">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-            title={`Switch to ${isDark ? "light" : "dark"} mode`}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground transition hover:bg-surface-secondary"
-          >
-            {isDark ? <Sun size={19} /> : <Moon size={19} />}
-          </button>
+          <ThemeToggle />
 
           {/* Mobile Menu Toggle */}
           <button
@@ -293,8 +304,14 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                     </div>
                   </div>
 
-                  {/* Mobile Logout */}
-                  <Link href={dashboard}>Dashboard</Link>
+                  <Link
+                    href={dashboard}
+                    onClick={closeMenus}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition hover:bg-surface-secondary"
+                  >
+                    Dashboard
+                  </Link>
+
                   <button
                     type="button"
                     onClick={handleLogout}

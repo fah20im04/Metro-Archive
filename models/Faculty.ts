@@ -1,21 +1,21 @@
 
-import mongoose, { Schema, Types, Model } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 
 export interface IFaculty {
   sourceId: number;
   name: string;
-  departmentIds: number[];
+  departmentNames: string[];
   courseIds: number[];
   designation: string;
   profileImage: string | null;
   profileStatus: "pending" | "active" | "inactive";
   createdAt: Date;
   updatedAt: Date | null;
+  upvoteCount: number;
 }
 
 const facultySchema = new Schema<IFaculty>(
   {
-    // Original ID from the university dataset
     sourceId: {
       type: Number,
       required: true,
@@ -28,9 +28,8 @@ const facultySchema = new Schema<IFaculty>(
       trim: true,
     },
 
-    // Preserve the university's original numeric IDs
-    departmentIds: {
-      type: [Number],
+    departmentNames: {
+      type: [String],
       default: [],
     },
 
@@ -55,13 +54,19 @@ const facultySchema = new Schema<IFaculty>(
       enum: ["active", "inactive"],
       default: "active",
     },
+
+    // Important: This must exist in the Mongoose schema
+    upvoteCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Prevent model recompilation during Next.js development
 const Faculty: Model<IFaculty> =
   mongoose.models.Faculty ||
   mongoose.model<IFaculty>("Faculty", facultySchema);

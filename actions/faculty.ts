@@ -3,10 +3,11 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import mongoose from "mongoose";
+import { connection } from "next/server";
 
 import connectDB from "@/lib/mongodb";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
+import mongoose, { type ClientSession } from "mongoose";
 
 import User from "@/models/user";
 import Faculty from "@/models/Faculty";
@@ -15,6 +16,8 @@ import {
   createFacultySchema,
   updateFacultySchema,
 } from "@/lib/validations/faculty";
+import { getCurrentUserAction } from "./auth";
+import FacultyVote from "@/models/FacultyVote";
 
 // Check whether the current user is an active admin
 export async function requireAdmin() {
@@ -44,10 +47,42 @@ export async function requireAdmin() {
   return user;
 }
 
+// get faculty by id
+
+export async function getFacultyById(id: string) {
+  try {
+    // Run dynamic database access inside the Suspense boundary
+    await connection();
+
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return null;
+    }
+
+    await connectDB();
+
+    const faculty = await Faculty.findById(id).lean();
+
+    if (!faculty) {
+      return null;
+    }
+
+    return JSON.parse(JSON.stringify(faculty));
+  } catch (error) {
+    console.error("Get faculty by ID error:", error);
+    return null;
+  }
+}
+
 // get faculty action
+
+
 
 export async function getFacultyAction() {
   try {
+    // Prevent this database operation from running during prerendering
+    await connection();
+
     await connectDB();
 
     const faculty = await Faculty.find({})
@@ -56,11 +91,13 @@ export async function getFacultyAction() {
 
     return {
       success: true,
-      faculty: JSON.parse(JSON.stringify(faculty)).map((member: any) => ({
-        ...member,
-        id: String(member._id),
-        _id: String(member._id),
-      })),
+      faculty: JSON.parse(JSON.stringify(faculty)).map(
+        (member: any) => ({
+          ...member,
+          id: String(member._id),
+          _id: String(member._id),
+        })
+      ),
     };
   } catch (error) {
     console.error("Get faculty error:", error);
@@ -68,6 +105,178 @@ export async function getFacultyAction() {
     return {
       success: false,
       faculty: [],
+    };
+  }
+}
+
+
+
+
+
+export async function voteFacultyAction(facultyId: string) {
+  let session: ClientSession | null = null;
+
+  try {
+    // 1. Authenticate user
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return {
+        success: false,
+        message: "Please login to vote.",
+        upvoteCount: 0,
+      };
+    }
+
+    // 2. Only students can vote
+    if (auth.user.role !== "student") {
+      return {
+        success: false,
+        message: "Only students can vote.",
+        upvoteCount: 0,
+      };
+    }
+
+    // 3. Validate faculty ID
+    if (!mongoose.Types.ObjectId.isValid(facultyId)) {
+      return {
+        success: false,
+        message: "Invalid faculty ID.",
+        upvoteCount: 0,
+      };
+    }
+
+    await connectDB();
+
+    session = await mongoose.startSession();
+
+    let response = {
+      success: false,
+      message: "Voting failed.",
+      upvoteCount: 0,
+    };
+
+    // 4. Perform both operations in one transaction
+    await session.withTransaction(async () => {
+      // Check whether the student has already voted
+      const existingVote = await FacultyVote.findOne({
+        facultyId,
+        userId: auth.user.id,
+      }).session(session!);
+
+      if (existingVote) {
+        response = {
+          success: false,
+          message: "You have already voted for this faculty.",
+          upvoteCount: 0,
+        };
+        return;
+      }
+
+      // Check whether faculty exists
+      const faculty = await Faculty.findById(facultyId).session(session!);
+
+      if (!faculty) {
+        response = {
+          success: false,
+          message: "Faculty not found.",
+          upvoteCount: 0,
+        };
+        return;
+      }
+
+      // 5. Create vote record
+      await FacultyVote.create(
+        [
+          {
+            facultyId,
+            userId: auth.user.id,
+          },
+        ],
+        { session: session! }
+      );
+
+      // 6. Increment the faculty document's upvoteCount
+      const updatedFaculty = await Faculty.findByIdAndUpdate(
+        facultyId,
+        {
+          $inc: { upvoteCount: 1 },
+        },
+        {
+          new: true,
+          session: session!,
+        }
+      );
+
+      // Make sure the faculty document was actually updated
+      if (!updatedFaculty) {
+        throw new Error("Faculty upvote count could not be updated.");
+      }
+
+      // 7. Return the actual updated count
+      response = {
+        success: true,
+        message: "Your vote has been recorded successfully.",
+        upvoteCount: updatedFaculty.upvoteCount,
+      };
+    });
+
+    return response;
+  } catch (error: any) {
+    console.error("Faculty voting error:", error);
+
+    if (error.code === 11000) {
+      return {
+        success: false,
+        message: "You have already voted for this faculty.",
+        upvoteCount: 0,
+      };
+    }
+
+    return {
+      success: false,
+      message: error.message || "Something went wrong while voting.",
+      upvoteCount: 0,
+    };
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
+  }
+}
+
+
+export async function getFacultyVoteStatusAction(facultyId: string) {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return {
+        success: true,
+        hasVoted: false,
+        isLoggedIn: false,
+      };
+    }
+
+    await connectDB();
+
+    const vote = await FacultyVote.findOne({
+      facultyId,
+      userId: auth.user.id,
+    }).lean();
+
+    return {
+      success: true,
+      hasVoted: !!vote,
+      isLoggedIn: true,
+    };
+  } catch (error) {
+    console.error("Vote status error:", error);
+
+    return {
+      success: false,
+      hasVoted: false,
+      isLoggedIn: false,
     };
   }
 }
