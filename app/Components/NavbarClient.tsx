@@ -16,6 +16,7 @@ import {
 import { useTheme } from "next-themes";
 
 import { logoutAction } from "@/actions/auth";
+import Image from "next/image";
 
 export type CurrentUser = {
   id: string;
@@ -138,9 +139,14 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           href="/"
           onClick={closeMenus}
           className="flex shrink-0 items-center gap-2.5"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-            <GraduationCap size={24} />
+        > 
+
+          {/* MU Logo */}
+          <div className="relative h-10 w-16 overflow-hidden">
+            {/* <Image src="/svg.webp" alt="description" fill className="object-cover" /> */}
+            <Image src={'/mu_logo.png'} alt="Metropolitan University logo"
+            fill className="object-cover rounded-xl"
+            />
           </div>
 
           <span className="text-xl font-bold tracking-tight text-foreground">
