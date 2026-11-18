@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Heart,
 } from "lucide-react";
 
 import { DEPARTMENTS } from "@/app/data/department";
@@ -211,7 +212,7 @@ export default function FacultyCardContainer({
 
                 <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <GraduationCap className="h-4 w-4" />
+                    <Heart className={'h-4 w-4'}/>
                     {member.upvoteCount ?? 0} Like
                   </div>
 
