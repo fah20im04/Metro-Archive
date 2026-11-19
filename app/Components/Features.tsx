@@ -1,77 +1,90 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, FileText, Star, LibraryBig } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  FileText,
+  LibraryBig,
+  Sparkles,
+  Star,
+} from "lucide-react";
 
 const features = [
   {
     icon: LibraryBig,
+    tag: "Structured by Batch",
     title: "Semester Archives",
     description:
-      "Explore organized academic resources by department, semester, and batch.",
+      "Navigate cleanly organized course repositories sorted by department, semester, and batch.",
     label: "Browse archives",
     href: "/archives",
-    color: "bg-primary-light text-primary",
+    span: "md:col-span-7",
+    accentClass: "text-primary bg-primary-light/70",
   },
   {
     icon: FileText,
-    title: "Previous Question Papers",
+    tag: "Exam Ready",
+    title: "Question Bank",
     description:
-      "Prepare smarter with previous exam questions collected from different batches.",
-    label: "Explore questions",
+      "Review past midterm and final exam papers from previous batches to spot patterns early.",
+    label: "Explore papers",
     href: "/question-bank",
-    color: "bg-accent-light text-accent",
+    span: "md:col-span-5",
+    accentClass: "text-accent bg-accent-light/70",
   },
   {
     icon: Star,
-    title: "Faculty Feedback",
+    tag: "Peer Insights",
+    title: "Faculty Reviews",
     description:
-      "Discover student ratings and constructive reviews to make informed choices.",
-    label: "View faculty",
+      "Read honest student feedback, teaching styles, and course ratings before registration.",
+    label: "Meet faculty",
     href: "/faculty",
-    color: "bg-primary-light text-primary",
+    span: "md:col-span-5",
+    accentClass: "text-accent bg-accent-light/70",
   },
   {
     icon: BookOpen,
+    tag: "Community Curated",
     title: "Shared Study Notes",
     description:
-      "Find helpful notes, study materials, and resources shared by fellow students.",
+      "Access handwritten notes, slide summaries, and peer-contributed guides across subjects.",
     label: "Find resources",
     href: "/resources",
-    color: "bg-primary-light text-primary",
+    span: "md:col-span-7",
+    accentClass: "text-primary bg-primary-light/70",
   },
 ];
 
 const Features = () => {
   return (
-    <section className="bg-[var(--surface-secondary)] px-5 py-20 transition-colors duration-200 sm:px-8">
-      {" "}
-      <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-              Explore CampusVault
-            </p>
+    <section className="relative overflow-hidden bg-background px-5 py-24 transition-colors duration-200 sm:px-8">
+      {/* Subtle ambient glow matching the Hero aesthetic */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 mx-auto h-72 max-w-3xl rounded-full bg-primary/5 blur-3xl" />
 
-            <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Everything you need to study smarter
-            </h2>
-
-            <p className="mt-4 max-w-2xl leading-7 text-muted">
-              Spend less time searching for materials and more time learning
-              with resources organized for your academic journey.
-            </p>
+      <div className="mx-auto max-w-6xl">
+        {/* Centered Editorial Header matching Hero */}
+        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/70 px-3.5 py-1.5 text-xs font-medium text-foreground backdrop-blur-md">
+            <Sparkles size={14} className="text-primary" />
+            <span>Explore MUArchive</span>
           </div>
 
-          <Link
-            href="/resources"
-            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary-hover"
-          >
-            Explore resources <ArrowRight size={17} />
-          </Link>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            Everything you need to{" "}
+            <span className="text-primary">study smarter.</span>
+          </h2>
+
+          <p className="mt-4 text-base leading-relaxed text-muted sm:text-lg">
+            Less time digging through scattered drives—more time learning with
+            resources built around your academic journey.
+          </p>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Asymmetric Editorial Bento Grid */}
+        <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-12">
           {features.map((feature) => {
             const Icon = feature.icon;
 
@@ -79,29 +92,47 @@ const Features = () => {
               <Link
                 key={feature.title}
                 href={feature.href}
-                className="group rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/40 hover:shadow-xl hover:shadow-black/5"
+                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/80 bg-surface/65 p-7 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:bg-surface hover:shadow-xl hover:shadow-black/5 sm:p-8 ${feature.span}`}
               >
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl ${feature.color}`}
-                >
-                  <Icon size={23} />
+                {/* Top row: Icon + Pill Tag + Corner Arrow */}
+                <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-105 ${feature.accentClass}`}
+                      >
+                        <Icon size={21} />
+                      </div>
+
+                      <span className="rounded-full border border-border/70 bg-background/60 px-3 py-1 text-xs font-medium text-muted">
+                        {feature.tag}
+                      </span>
+                    </div>
+
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-background/60 text-muted transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary group-hover:text-white">
+                      <ArrowUpRight
+                        size={17}
+                        className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Title & Description */}
+                  <h3 className="mt-7 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                    {feature.title}
+                  </h3>
+
+                  <p className="mt-2.5 max-w-lg text-sm leading-relaxed text-muted sm:text-base">
+                    {feature.description}
+                  </p>
                 </div>
 
-                <h3 className="mt-5 text-lg font-bold text-foreground">
-                  {feature.title}
-                </h3>
-
-                <p className="mt-3 min-h-20 text-sm leading-6 text-muted">
-                  {feature.description}
-                </p>
-
-                <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-primary">
-                  {feature.label}
-
-                  <ArrowRight
-                    size={16}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
+                {/* Subtle Bottom Action Link */}
+                <div className="mt-8 flex items-center gap-1.5 text-sm font-semibold text-primary">
+                  <span>{feature.label}</span>
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    →
+                  </span>
                 </div>
               </Link>
             );

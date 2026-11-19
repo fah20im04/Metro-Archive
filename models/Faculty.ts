@@ -5,6 +5,7 @@ export interface IFaculty {
   sourceId: number;
   name: string;
   departmentNames: string[];
+  departmentIds: number [];
   courseIds: number[];
   designation: string;
   profileImage: string | null;
@@ -28,10 +29,15 @@ const facultySchema = new Schema<IFaculty>(
       trim: true,
     },
 
-    departmentNames: {
-      type: [String],
-      default: [],
-    },
+    departmentIds: {
+  type: [Number],
+  default: [],
+},
+
+departmentNames: {
+  type: [String],
+  default: [],
+},
 
     courseIds: {
       type: [Number],

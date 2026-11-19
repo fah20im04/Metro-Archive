@@ -6,202 +6,87 @@ import {
   GraduationCap,
   Search,
   Star,
-  Users,
-  ShieldCheck,
 } from "lucide-react";
 import HeroBackground from "./HeroBackground";
 
 export default function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-background transition-colors duration-200">
-      {/* Background image */}
-      {/* <Image
-        src="/mu-main-building-hero.jpg"
-        alt=""
-        fill
-        priority
-        className="-z-20 object-cover"
-      /> */}
-
-      {/* <Hero /> */}
+    <section className="relative isolate flex min-h-[85vh] items-center overflow-hidden bg-background transition-colors duration-200">
+      {/* Keep HeroBackground untouched */}
       <HeroBackground />
 
-      {/* Theme-aware overlay: strongest behind the text, lighter toward the image */}
-      <div className="absolute inset-0 -z-10 bg-linear-to-b from-background/95 to-background/80 md:bg-linear-to-r md:from-background/95 md:via-background/85 md:to-background/50" />
+      {/* Subtle radial & edge vignette so the background illustration shines clearly */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-t from-background via-background/5 to-background/10" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_center,var(--color-background)_0%,transparent_75%)] opacity-75" />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 md:grid-cols-2 md:py-28">
-        {/* Hero Content */}
-        <div>
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-light px-3.5 py-2 text-sm font-medium text-primary">
-            <ShieldCheck size={16} />
-            Your university resource hub
-          </div>
-
-          <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Your academic journey,
-            <span className="text-primary"> all in one place.</span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg">
-            Discover semester-wise archives, previous question papers, shared
-            study notes, and faculty feedback — all in one community built for
-            students.
-          </p>
-
-          {/* Search bar */}
-          <form
-            action="/search"
-            method="GET"
-            className="mt-8 flex max-w-xl items-center gap-3 rounded-2xl border border-border bg-surface p-2 shadow-lg shadow-black/5 transition-colors duration-200"
-          >
-            <Search className="ml-2 shrink-0 text-muted-foreground" size={21} />
-
-            <input
-              type="search"
-              name="q"
-              placeholder="Search notes, courses, question papers..."
-              aria-label="Search academic resources"
-              className="min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:outline-none"
-            />
-
-            <button
-              type="submit"
-              className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary-hover"
-            >
-              Search
-            </button>
-          </form>
-
-          {/* Action buttons */}
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="/archives"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-5 py-3.5 text-sm font-semibold text-white! transition hover:bg-primary-hover"
-            >
-              Explore Archives <ArrowRight size={17} />
-            </Link>
-
-            <Link
-              href="/question-bank"
-              className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-5 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:text-primary"
-            >
-              <FileText size={17} />
-              Question Bank
-            </Link>
-          </div>
-
-          {/* Community indicator */}
-          <div className="mt-9 flex items-center gap-3 text-sm text-muted">
-            <div className="flex -space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-primary-light text-primary">
-                <Users size={15} />
-              </div>
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-accent-light text-accent">
-                <BookOpen size={15} />
-              </div>
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-surface bg-primary-light text-primary">
-                <GraduationCap size={15} />
-              </div>
-            </div>
-
-            <span>Built for students, powered by shared knowledge.</span>
-          </div>
+      <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-5 py-24 text-center sm:px-8">
+        {/* Minimalist Pill Badge */}
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/65 px-4 py-1.5 text-xs font-medium text-foreground shadow-sm backdrop-blur-md">
+          <GraduationCap size={15} className="text-primary" />
+          <span>University Resource Hub</span>
         </div>
 
-        {/* Hero visual */}
-        <div className="relative mx-auto w-full max-w-lg">
-          <div className="absolute -inset-5 rounded-4xl bg-linear-to-br from-primary-light via-surface to-accent-light blur-xl" />
+        {/* Clean, Refined Typography */}
+        <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+          Your academic journey,{" "}
+          <span className="text-primary">all in one place.</span>
+        </h1>
 
-          <div className="relative rounded-3xl border border-border bg-surface p-5 shadow-2xl shadow-black/10 transition-colors duration-200 sm:p-7">
-            {/* Card header */}
-            <div className="flex items-center justify-between border-b border-border pb-5">
-              <div>
-                <p className="text-sm text-muted">Welcome to</p>
-                <h2 className="mt-1 text-xl font-bold text-foreground">
-                  Your study space
-                </h2>
-              </div>
+        <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground/80 sm:text-lg">
+          Semester archives, past question papers, shared notes, and faculty
+          insights — curated by students, for students.
+        </p>
 
-              <div className="rounded-xl bg-primary-light p-3 text-primary">
-                <GraduationCap size={25} />
-              </div>
-            </div>
+        {/* Glassmorphic Spotlight Search Bar */}
+        <form
+          action="/search"
+          method="GET"
+          className="mt-9 flex w-full max-w-xl items-center gap-2 rounded-2xl border border-border/80 bg-surface/75 p-2 shadow-xl shadow-black/5 backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:bg-surface/95"
+        >
+          <Search className="ml-3 shrink-0 text-muted-foreground" size={20} />
 
-            {/* Semester archive */}
-            <div className="mt-6 rounded-2xl bg-surface-secondary p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    Semester Archive
-                  </p>
+          <input
+            type="search"
+            name="q"
+            placeholder="Search courses, notes, or past papers..."
+            aria-label="Search academic resources"
+            className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
 
-                  <p className="mt-1 text-xs text-muted">CSE · Semester 3.3</p>
-                </div>
+          <button
+            type="submit"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
+          >
+            <span>Search</span>
+            <ArrowRight size={16} />
+          </button>
+        </form>
 
-                <span className="rounded-lg bg-success-light px-2.5 py-1 text-xs font-semibold text-success">
-                  Available
-                </span>
-              </div>
+        {/* Lightweight Glass Dock for Core Sections */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/archives"
+            className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/65 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md transition hover:border-primary/40 hover:bg-surface/90 hover:text-primary"
+          >
+            <BookOpen size={15} className="text-primary" />
+            <span>Semester Archives</span>
+          </Link>
 
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-border">
-                <div className="h-full w-3/4 rounded-full bg-primary" />
-              </div>
+          <Link
+            href="/question-bank"
+            className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/65 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md transition hover:border-primary/40 hover:bg-surface/90 hover:text-primary"
+          >
+            <FileText size={15} className="text-accent" />
+            <span>Question Bank</span>
+          </Link>
 
-              <p className="mt-2 text-xs text-muted">
-                Notes, resources and previous questions
-              </p>
-            </div>
-
-            {/* Feature cards */}
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div className="rounded-2xl border border-border bg-surface p-4 transition-colors duration-200">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-light text-accent">
-                  <FileText size={20} />
-                </div>
-
-                <p className="text-sm font-semibold text-foreground">
-                  Question Bank
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-muted">
-                  Past papers across batches
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-surface p-4 transition-colors duration-200">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-light text-primary">
-                  <Star size={20} />
-                </div>
-
-                <p className="text-sm font-semibold text-foreground">
-                  Faculty Reviews
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-muted">
-                  Student feedback and ratings
-                </p>
-              </div>
-            </div>
-
-            {/* Community callout */}
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary-light/70 p-4">
-              <div className="rounded-xl bg-surface p-2.5 text-primary shadow-sm">
-                <Users size={20} />
-              </div>
-
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Learn together
-                </p>
-
-                <p className="mt-1 text-xs text-muted">
-                  Share knowledge with your university community.
-                </p>
-              </div>
-            </div>
-          </div>
+          <Link
+            href="/faculty"
+            className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/65 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md transition hover:border-primary/40 hover:bg-surface/90 hover:text-primary"
+          >
+            <Star size={15} className="text-primary" />
+            <span>Faculty Reviews</span>
+          </Link>
         </div>
       </div>
     </section>
