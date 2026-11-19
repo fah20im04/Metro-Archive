@@ -1,6 +1,3 @@
-"use client";
-
-import React from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -12,13 +9,25 @@ import {
   Users,
   ShieldCheck,
 } from "lucide-react";
+import HeroBackground from "./HeroBackground";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-background transition-colors duration-200">
-      {/* Background decorations */}
-      <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary-light/60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-accent-light/50 blur-3xl" />
+    <section className="relative isolate overflow-hidden bg-background transition-colors duration-200">
+      {/* Background image */}
+      {/* <Image
+        src="/mu-main-building-hero.jpg"
+        alt=""
+        fill
+        priority
+        className="-z-20 object-cover"
+      /> */}
+
+      {/* <Hero /> */}
+      <HeroBackground />
+
+      {/* Theme-aware overlay: strongest behind the text, lighter toward the image */}
+      <div className="absolute inset-0 -z-10 bg-linear-to-b from-background/95 to-background/80 md:bg-linear-to-r md:from-background/95 md:via-background/85 md:to-background/50" />
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 md:grid-cols-2 md:py-28">
         {/* Hero Content */}
@@ -67,7 +76,7 @@ export default function Hero() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/archives"
-              className="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-5 py-3.5 text-sm font-semibold !text-white transition hover:bg-primary-hover"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-5 py-3.5 text-sm font-semibold text-white! transition hover:bg-primary-hover"
             >
               Explore Archives <ArrowRight size={17} />
             </Link>
@@ -103,7 +112,7 @@ export default function Hero() {
 
         {/* Hero visual */}
         <div className="relative mx-auto w-full max-w-lg">
-          <div className="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-primary-light via-surface to-accent-light blur-xl" />
+          <div className="absolute -inset-5 rounded-4xl bg-linear-to-br from-primary-light via-surface to-accent-light blur-xl" />
 
           <div className="relative rounded-3xl border border-border bg-surface p-5 shadow-2xl shadow-black/10 transition-colors duration-200 sm:p-7">
             {/* Card header */}
