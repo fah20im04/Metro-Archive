@@ -1,5 +1,3 @@
-"use client";
-
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -17,9 +15,7 @@ const Footer = () => {
         <p className="text-center text-sm text-muted">
           A better way to share knowledge and learn together.
         </p>
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} CampusVault
-        </p>
+        <p className="text-sm text-muted-foreground">© CampusVault</p>
       </div>
     </footer>
   );
