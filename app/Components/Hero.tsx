@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,18 +9,22 @@ import {
   Users,
   ShieldCheck,
 } from "lucide-react";
+import HeroBackground from "./HeroBackground";
 
 export default function Hero() {
   return (
     <section className="relative isolate overflow-hidden bg-background transition-colors duration-200">
       {/* Background image */}
-      <Image
+      {/* <Image
         src="/mu-main-building-hero.jpg"
         alt=""
         fill
         priority
         className="-z-20 object-cover"
-      />
+      /> */}
+
+      {/* <Hero /> */}
+      <HeroBackground />
 
       {/* Theme-aware overlay: strongest behind the text, lighter toward the image */}
       <div className="absolute inset-0 -z-10 bg-linear-to-b from-background/95 to-background/80 md:bg-linear-to-r md:from-background/95 md:via-background/85 md:to-background/50" />
