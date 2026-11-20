@@ -28,6 +28,8 @@ interface FacultyCardContainerProps {
   faculty: FacultyMember[];
 }
 
+type SortOption = "default" | "most-liked" | "least-liked";
+
 const ITEMS_PER_PAGE = 9;
 
 export default function FacultyCardContainer({
@@ -36,6 +38,7 @@ export default function FacultyCardContainer({
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("all");
   const [designation, setDesignation] = useState("all");
+  const [sortBy, setSortBy] = useState<SortOption>("default");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get unique designations
@@ -47,11 +50,11 @@ export default function FacultyCardContainer({
     [faculty],
   );
 
-  // Filter faculty members
+  // Filter and sort faculty members
   const filteredFaculty = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return faculty.filter((member) => {
+    const filtered = faculty.filter((member) => {
       const matchesSearch =
         !query ||
         member.name.toLowerCase().includes(query) ||
@@ -66,7 +69,21 @@ export default function FacultyCardContainer({
 
       return matchesSearch && matchesDepartment && matchesDesignation;
     });
-  }, [faculty, search, department, designation]);
+
+    if (sortBy === "most-liked") {
+      return [...filtered].sort(
+        (a, b) => (b.upvoteCount ?? 0) - (a.upvoteCount ?? 0),
+      );
+    }
+
+    if (sortBy === "least-liked") {
+      return [...filtered].sort(
+        (a, b) => (a.upvoteCount ?? 0) - (b.upvoteCount ?? 0),
+      );
+    }
+
+    return filtered;
+  }, [faculty, search, department, designation, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredFaculty.length / ITEMS_PER_PAGE);
@@ -83,6 +100,7 @@ export default function FacultyCardContainer({
     setSearch("");
     setDepartment("all");
     setDesignation("all");
+    setSortBy("default");
     setCurrentPage(1);
   }
 
@@ -95,7 +113,7 @@ export default function FacultyCardContainer({
           <h2 className="font-semibold">Find Faculty</h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -146,6 +164,21 @@ export default function FacultyCardContainer({
               </option>
             ))}
           </select>
+
+          {/* Sort by likes */}
+          <select
+            value={sortBy}
+            onChange={(event) => {
+              setSortBy(event.target.value as SortOption);
+              setCurrentPage(1);
+            }}
+            aria-label="Sort by like count"
+            className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+          >
+            <option value="default">Sort: Default</option>
+            <option value="most-liked">Likes: Most to Least</option>
+            <option value="least-liked">Likes: Least to Most</option>
+          </select>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -153,7 +186,10 @@ export default function FacultyCardContainer({
             {filteredFaculty.length} faculty members found
           </p>
 
-          {(search || department !== "all" || designation !== "all") && (
+          {(search ||
+            department !== "all" ||
+            designation !== "all" ||
+            sortBy !== "default") && (
             <button
               onClick={clearFilters}
               className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:opacity-80"
@@ -212,7 +248,7 @@ export default function FacultyCardContainer({
 
                 <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Heart className={'h-4 w-4'}/>
+                    <Heart className="h-4 w-4" />
                     {member.upvoteCount ?? 0} Like
                   </div>
 
