@@ -73,7 +73,7 @@ export default function Hero() {
           </Link>
 
           <Link
-            href="/question-bank"
+            href="/questionBank"
             className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/65 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-md transition hover:border-primary/40 hover:bg-surface/90 hover:text-primary"
           >
             <FileText size={15} className="text-accent" />
