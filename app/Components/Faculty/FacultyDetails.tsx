@@ -7,11 +7,13 @@ import {
   Heart,
   GraduationCap,
   Loader2,
+  PenLine,
   UserRound,
 } from "lucide-react";
 
 import { voteFacultyAction } from "@/actions/faculty";
 import { DEPARTMENTS } from "@/app/data/department";
+import ReviewModal from "./ReviewModal";
 
 interface Faculty {
   _id: string;
@@ -40,6 +42,7 @@ export default function FacultyDetails({
   const [likeCount, setLikeCount] = useState(faculty.upvoteCount ?? 0);
   const [isLiking, setIsLiking] = useState(false);
   const [message, setMessage] = useState("");
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   // Find faculty departments
   const facultyDepartments = DEPARTMENTS.filter((department) =>
@@ -74,6 +77,25 @@ export default function FacultyDetails({
     } finally {
       setIsLiking(false);
     }
+  }
+
+  function handleWriteReview() {
+    if (!isLoggedIn) {
+      setMessage("Please login to write a review.");
+      return;
+    }
+
+    setMessage("");
+    setIsReviewOpen(true);
+  }
+
+  // TODO: replace with the real server action (e.g. createReviewAction)
+  async function handleReviewSubmit(data: {
+    title: string;
+    description: string;
+  }) {
+    console.log("Review submitted:", { facultyId: faculty._id, ...data });
+    setMessage("Thanks! Your review was submitted.");
   }
 
   return (
@@ -157,26 +179,36 @@ export default function FacultyDetails({
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={handleLike}
-              disabled={hasLiked || isLiking}
-              className={`inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
-                hasLiked
-                  ? "cursor-default border border-primary/30 bg-primary/10 text-primary"
-                  : "bg-primary text-primary-foreground hover:opacity-90"
-              } disabled:opacity-80`}
-            >
-              {isLiking ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Heart
-                  className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`}
-                />
-              )}
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleLike}
+                disabled={hasLiked || isLiking}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${hasLiked
+                    ? "cursor-default border border-primary/30 bg-primary/10 text-primary"
+                    : "bg-primary text-primary-foreground hover:opacity-90"
+                  } disabled:opacity-80`}
+              >
+                {isLiking ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Heart
+                    className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`}
+                  />
+                )}
 
-              {isLiking ? "Liking..." : hasLiked ? "Liked" : "Like Faculty"}
-            </button>
+                {isLiking ? "Liking..." : hasLiked ? "Liked" : "Like Faculty"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleWriteReview}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-surface px-5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-secondary"
+              >
+                <PenLine className="h-4 w-4" />
+                Write a Review
+              </button>
+            </div>
           </div>
 
           {/* Like count */}
@@ -196,6 +228,12 @@ export default function FacultyDetails({
           )}
         </div>
       </section>
+
+      <ReviewModal
+        isOpen={isReviewOpen}
+        onClose={() => setIsReviewOpen(false)}
+        onSubmit={handleReviewSubmit}
+      />
     </main>
   );
 }
