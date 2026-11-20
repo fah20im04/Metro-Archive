@@ -10,10 +10,13 @@ import {
   PenLine,
   UserRound,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { voteFacultyAction } from "@/actions/faculty";
 import { DEPARTMENTS } from "@/app/data/department";
+import { createFacultyReviewAction } from "@/actions/facultyReview";
 import ReviewModal from "./ReviewModal";
+import Review from "./Review";
 
 interface Faculty {
   _id: string;
@@ -51,7 +54,7 @@ export default function FacultyDetails({
 
   async function handleLike() {
     if (!isLoggedIn) {
-      setMessage("Please login to like this faculty member.");
+      toast.error("Please login to like this faculty member.");
       return;
     }
 
@@ -64,16 +67,19 @@ export default function FacultyDetails({
       const result = await voteFacultyAction(faculty._id);
 
       if (!result.success) {
-        setMessage(result.message);
+        toast.error(result.message);
         return;
       }
 
       setHasLiked(true);
       setLikeCount(result.upvoteCount);
-      setMessage("You liked this faculty member.");
+
+      toast.success("Thank you for your like!", {
+        description: "Your appreciation has been recorded.",
+      });
     } catch (error) {
       console.error("Faculty like error:", error);
-      setMessage("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLiking(false);
     }
@@ -89,13 +95,38 @@ export default function FacultyDetails({
     setIsReviewOpen(true);
   }
 
-  // TODO: replace with the real server action (e.g. createReviewAction)
-  async function handleReviewSubmit(data: {
+  async function handleSubmitReview(data: {
     title: string;
     description: string;
   }) {
-    console.log("Review submitted:", { facultyId: faculty._id, ...data });
-    setMessage("Thanks! Your review was submitted.");
+    try {
+      const result = await createFacultyReviewAction({
+        facultyId: faculty._id,
+        title: data.title,
+        description: data.description,
+      });
+
+      if (!result.success) {
+        toast.error(result.message);
+        throw new Error(result.message);
+      }
+
+      toast.success("Review submitted successfully!", {
+        description: "Your review is waiting for admin approval.",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        // The error toast is already shown for backend errors.
+        // Show a fallback only for unexpected errors.
+        if (!error.message) {
+          toast.error("Something went wrong. Please try again.");
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+
+      throw error;
+    }
   }
 
   return (
@@ -184,10 +215,11 @@ export default function FacultyDetails({
                 type="button"
                 onClick={handleLike}
                 disabled={hasLiked || isLiking}
-                className={`inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${hasLiked
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
+                  hasLiked
                     ? "cursor-default border border-primary/30 bg-primary/10 text-primary"
                     : "bg-primary text-primary-foreground hover:opacity-90"
-                  } disabled:opacity-80`}
+                } disabled:opacity-80`}
               >
                 {isLiking ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -210,6 +242,7 @@ export default function FacultyDetails({
               </button>
             </div>
           </div>
+          <Review facultyId={faculty._id} />
 
           {/* Like count */}
           <div className="mt-5 flex items-center gap-2 text-sm text-muted-foreground">
@@ -232,7 +265,7 @@ export default function FacultyDetails({
       <ReviewModal
         isOpen={isReviewOpen}
         onClose={() => setIsReviewOpen(false)}
-        onSubmit={handleReviewSubmit}
+        onSubmit={handleSubmitReview}
       />
     </main>
   );
