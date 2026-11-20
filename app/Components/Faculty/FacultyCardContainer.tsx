@@ -199,7 +199,7 @@ export default function FacultyCardContainer({
                     </div>
                   )}
 
-                  <div className="min-w-0 flex-1">
+                  <Link href={`/faculty/${member._id}`} className="min-w-0 flex-1">
                     <h2 className="line-clamp-2 font-semibold text-foreground">
                       {member.name}
                     </h2>
@@ -207,7 +207,7 @@ export default function FacultyCardContainer({
                     <p className="mt-1 text-sm text-muted-foreground">
                       {member.designation}
                     </p>
-                  </div>
+                  </Link>
                 </div>
 
                 <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
