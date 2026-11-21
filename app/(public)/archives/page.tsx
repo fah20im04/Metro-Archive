@@ -1,5 +1,5 @@
 import React from "react";
-import Archive from "../../Components/Archive";
+import Archive from "../../Components/archive/Archive";
 
 const page = () => {
   return (
