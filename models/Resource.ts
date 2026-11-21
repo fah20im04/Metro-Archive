@@ -14,6 +14,7 @@ export interface IResource {
     | "Other";
   driveUrl: string;
   uploadedBy: mongoose.Types.ObjectId;
+  archiveId?: mongoose.Types.ObjectId | null;
   likeCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -64,6 +65,12 @@ const resourceSchema = new Schema<IResource>(
       ref: "User",
       required: true,
     },
+    // Which archive this resource belongs to (optional for older resources)
+    archiveId: {
+      type: Schema.Types.ObjectId,
+      ref: "Archive",
+      default: null,
+    },
     likeCount: {
       type: Number,
       default: 0,
@@ -79,6 +86,7 @@ const resourceSchema = new Schema<IResource>(
 resourceSchema.index({ courseCode: 1, createdAt: -1 });
 resourceSchema.index({ departmentCode: 1, createdAt: -1 });
 resourceSchema.index({ uploadedBy: 1 });
+resourceSchema.index({ archiveId: 1, createdAt: -1 });
 
 const Resource: Model<IResource> =
   mongoose.models.Resource ||
