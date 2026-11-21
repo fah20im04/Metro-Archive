@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Search,
   FolderOpen,
@@ -12,62 +14,75 @@ import {
   BookOpen,
 } from "lucide-react";
 
-const archives = [
-  {
-    id: 1,
-    name: "3.3 - CSE - 60",
-    department: "Computer Science & Engineering",
-    semester: "3rd Year, 3rd Semester",
-    members: 42,
-    resources: 128,
-    description: "Notes, assignments, lab reports and previous questions.",
-  },
-  {
-    id: 2,
-    name: "3.2 - CSE - 60",
-    department: "Computer Science & Engineering",
-    semester: "3rd Year, 2nd Semester",
-    members: 36,
-    resources: 94,
-    description: "Academic resources shared by students of this batch.",
-  },
-  {
-    id: 3,
-    name: "2.1 - CSE - 60",
-    department: "Computer Science & Engineering",
-    semester: "2nd Year, 1st Semester",
-    members: 51,
-    resources: 156,
-    description: "A collection of course materials and examination resources.",
-  },
-  {
-    id: 4,
-    name: "3.3 - BBA - 27",
-    department: "Business Administration",
-    semester: "3rd Year, 3rd Semester",
-    members: 28,
-    resources: 76,
-    description: "Shared notes, presentations and previous examination papers.",
-  },
-];
+import { createArchiveAction } from "@/actions/archive";
+import { buildArchiveTitle, semesterLabel } from "@/lib/archive";
+import CreateArchiveModal, { type CreateArchiveData } from "./CreateArchiveModal";
 
-const Archive = () => {
+export interface ArchiveItem {
+  id: string;
+  title: string;
+  semester: string;
+  department: string;
+  batch: string;
+  description: string;
+  createdByName: string;
+  resourceCount: number;
+}
+
+interface ArchiveProps {
+  archives: ArchiveItem[];
+  stats: {
+    totalArchives: number;
+    contributors: number;
+    resources: number;
+  };
+  isLoggedIn: boolean;
+}
+
+const Archive = ({ archives, stats, isLoggedIn }: ArchiveProps) => {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const filters = ["All", "CSE", "BBA", "EEE", "Other"];
 
   const filteredArchives = archives.filter((archive) => {
+    const query = search.toLowerCase();
+
     const matchesSearch =
-      archive.name.toLowerCase().includes(search.toLowerCase()) ||
-      archive.department.toLowerCase().includes(search.toLowerCase());
+      archive.title.toLowerCase().includes(query) ||
+      archive.department.toLowerCase().includes(query);
 
     const matchesFilter =
       activeFilter === "All" ||
-      archive.name.toUpperCase().includes(activeFilter);
+      (activeFilter === "Other"
+        ? !["CSE", "BBA", "EEE"].includes(archive.department)
+        : archive.department === activeFilter);
 
     return matchesSearch && matchesFilter;
   });
+
+  function handleCreateClick() {
+    if (!isLoggedIn) {
+      toast.error("Please login to create an archive.");
+      return;
+    }
+
+    setIsCreateOpen(true);
+  }
+
+  async function handleCreateArchive(data: CreateArchiveData) {
+    const result = await createArchiveAction(data);
+
+    if (!result.success) {
+      // The modal shows this message and stays open
+      throw new Error(result.message);
+    }
+
+    toast.success(result.message);
+    router.refresh();
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -91,7 +106,11 @@ const Archive = () => {
             </p>
           </div>
 
-          <button className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-hover">
+          <button
+            type="button"
+            onClick={handleCreateClick}
+            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-hover"
+          >
             <Plus size={18} />
             Create Archive
           </button>
@@ -104,7 +123,9 @@ const Archive = () => {
               <FolderOpen size={20} />
             </div>
             <p className="text-sm text-muted">Total Archives</p>
-            <h2 className="mt-1 text-2xl font-bold">24</h2>
+            <h2 className="mt-1 text-2xl font-bold">
+              {stats.totalArchives.toLocaleString()}
+            </h2>
           </div>
 
           <div className="card rounded-xl p-5">
@@ -112,7 +133,9 @@ const Archive = () => {
               <Users size={20} />
             </div>
             <p className="text-sm text-muted">Contributors</p>
-            <h2 className="mt-1 text-2xl font-bold">486</h2>
+            <h2 className="mt-1 text-2xl font-bold">
+              {stats.contributors.toLocaleString()}
+            </h2>
           </div>
 
           <div className="card rounded-xl p-5">
@@ -120,7 +143,9 @@ const Archive = () => {
               <FileText size={20} />
             </div>
             <p className="text-sm text-muted">Shared Resources</p>
-            <h2 className="mt-1 text-2xl font-bold">1,280</h2>
+            <h2 className="mt-1 text-2xl font-bold">
+              {stats.resources.toLocaleString()}
+            </h2>
           </div>
         </div>
 
@@ -146,11 +171,10 @@ const Archive = () => {
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  activeFilter === filter
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${activeFilter === filter
                     ? "bg-primary text-white"
                     : "border border-border bg-surface text-muted hover:border-primary hover:text-primary"
-                }`}
+                  }`}
               >
                 {filter}
               </button>
@@ -181,32 +205,37 @@ const Archive = () => {
                 </div>
 
                 <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
-                  {archive.name.split("-")[1].trim()}
+                  {archive.department}
                 </span>
               </div>
 
               {/* Details */}
               <h3 className="text-lg font-bold tracking-tight">
-                {archive.name}
+                {archive.title}
               </h3>
 
               <p className="mt-1 text-xs font-medium text-primary">
-                {archive.department}
+                {semesterLabel(archive.semester)} · Batch {archive.batch}
               </p>
 
               <p className="mt-3 min-h-10 text-sm leading-5 text-muted">
-                {archive.description}
+                {archive.description ||
+                  `Resources shared by students of ${buildArchiveTitle(
+                    archive.semester,
+                    archive.department,
+                    archive.batch
+                  )}.`}
               </p>
 
               <div className="mt-5 flex items-center gap-4 border-t border-border pt-4">
                 <div className="flex items-center gap-1.5 text-xs text-muted">
                   <Users size={15} />
-                  {archive.members} Members
+                  By {archive.createdByName}
                 </div>
 
                 <div className="flex items-center gap-1.5 text-xs text-muted">
                   <BookOpen size={15} />
-                  {archive.resources} Resources
+                  {archive.resourceCount} Resources
                 </div>
               </div>
 
@@ -225,11 +254,19 @@ const Archive = () => {
             <FolderOpen size={35} className="mx-auto text-muted-foreground" />
             <h3 className="mt-4 font-semibold">No archives found</h3>
             <p className="mt-2 text-sm text-muted">
-              Try another search or select a different department.
+              {archives.length === 0
+                ? "No archive has been created yet. Be the first to create one."
+                : "Try another search or select a different department."}
             </p>
           </div>
         )}
       </div>
+
+      <CreateArchiveModal
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSubmit={handleCreateArchive}
+      />
     </main>
   );
 };
