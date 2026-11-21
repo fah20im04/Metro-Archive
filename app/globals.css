@@ -1,69 +1,91 @@
 @import "tailwindcss";
 
 /* =========================================
-   1. ROOT VARIABLES — LIGHT THEME
+   1. TOKENS
+   Palette: mineral green-grey paper, deep pine
+   primary, marigold accent, brick for danger.
+   Neutrals carry a slight green undertone so
+   nothing reads as default slate or pure grey.
 ========================================= */
 
 :root {
   color-scheme: light;
 
-  /* Brand Colors */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-dark: #1e3a8a;
-  --primary-light: #eff6ff;
+  /* Brand */
+  --primary: #14594a;
+  --primary-hover: #0f4a3d;
+  --primary-dark: #0a3329;
+  --primary-light: #e3efe9;
 
-  --accent: #dc2626;
-  --accent-hover: #b91c1c;
-  --accent-light: #fef2f2;
+  --accent: #e0a526;
+  --accent-hover: #c98f16;
+  --accent-light: #fbf1d9;
+  --accent-foreground: #2a1d00;
 
-  /* Backgrounds */
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --surface-secondary: #f1f5f9;
+  /* Surfaces */
+  --background: #eceee8;
+  --surface: #f9faf7;
+  --surface-secondary: #e2e5dd;
 
   /* Text */
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --muted-foreground: #94a3b8;
+  --foreground: #19221e;
+  --muted: #5b675f;
+  --muted-foreground: #8a948c;
 
-  /* Borders */
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  /* Lines */
+  --border: #d3d8cd;
+  --border-strong: #b6beb0;
 
-  /* Status Colors */
-  --success: #16a34a;
-  --success-light: #f0fdf4;
+  /* Status */
+  --success: #2f7d4f;
+  --success-light: #e1f0e6;
 
-  --warning: #d97706;
-  --warning-light: #fffbeb;
+  --warning: #b86e0b;
+  --warning-light: #f8ead2;
 
-  --danger: #dc2626;
-  --danger-light: #fef2f2;
+  --danger: #b3382c;
+  --danger-light: #f6e0dc;
 
-  --info: #0284c7;
-  --info-light: #f0f9ff;
+  --info: #2d6a86;
+  --info-light: #dfecf1;
 
-  /* UI Effects */
-  --radius: 0.75rem;
-  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
-  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08);
-  --shadow-lg: 0 12px 28px -8px rgb(15 23 42 / 0.12);
+  /* Shape: tighter radii, borders do most of the work */
+  --radius: 0.5rem;
+  --radius-sm: 0.3125rem;
+  --radius-lg: 0.875rem;
 
-  /* Focus Ring */
-  --ring: #93c5fd;
+  /* Shadows are tinted with the ink colour, kept shallow */
+  --shadow-sm: 0 1px 0 0 rgb(25 34 30 / 0.04);
+  --shadow-md:
+    0 2px 6px -1px rgb(25 34 30 / 0.08), 0 1px 2px rgb(25 34 30 / 0.05);
+  --shadow-lg: 0 14px 32px -12px rgb(25 34 30 / 0.22);
+
+  --ring: #5aa592;
+
+  /* Type */
+  --tracking-display: -0.022em;
+  --measure: 66ch;
 }
 
 /* =========================================
-   2. TAILWIND CSS V4 THEME
+   2. TAILWIND V4 THEME
+   Same token names as before, so existing
+   utility classes (bg-primary, text-muted…)
+   keep working.
 ========================================= */
 
 @theme inline {
-  /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Fonts: set --font-body / --font-heading via next/font in layout.
+     Fallbacks apply if they are not loaded. */
+  --font-sans:
+    var(--font-body, "Instrument Sans"), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-display:
+    var(--font-heading, "Bricolage Grotesque"),
+    var(--font-body, "Instrument Sans"), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 
-  /* Backgrounds and Text */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -72,7 +94,6 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  /* Brand Colors */
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-dark: var(--primary-dark);
@@ -81,12 +102,11 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
 
-  /* Borders */
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
 
-  /* Status Colors */
   --color-success: var(--success);
   --color-success-light: var(--success-light);
 
@@ -99,7 +119,6 @@
   --color-info: var(--info);
   --color-info-light: var(--info-light);
 
-  /* Border Radius */
   --radius-card: var(--radius);
 }
 
@@ -110,47 +129,48 @@
 .dark {
   color-scheme: dark;
 
-  --background: #0b1120;
-  --surface: #111827;
-  --surface-secondary: #1e293b;
+  --background: #121815;
+  --surface: #19211d;
+  --surface-secondary: #232d28;
 
-  --foreground: #f1f5f9;
-  --muted: #94a3b8;
-  --muted-foreground: #64748b;
+  --foreground: #e8ece6;
+  --muted: #a0aba3;
+  --muted-foreground: #758079;
 
-  --border: #334155;
-  --border-strong: #475569;
+  --border: #2f3b35;
+  --border-strong: #44534b;
 
-  --primary: #60a5fa;
-  --primary-hover: #93c5fd;
-  --primary-dark: #3b82f6;
-  --primary-light: #172554;
+  --primary: #6fc2a9;
+  --primary-hover: #8fd3be;
+  --primary-dark: #4fa88d;
+  --primary-light: #17302a;
 
-  --accent: #f87171;
-  --accent-hover: #fca5a5;
-  --accent-light: #450a0a;
+  --accent: #f0bb45;
+  --accent-hover: #f6cd6c;
+  --accent-light: #3a2d0c;
+  --accent-foreground: #251a00;
 
-  --success: #4ade80;
-  --success-light: #052e16;
+  --success: #6cc58c;
+  --success-light: #14301f;
 
-  --warning: #fbbf24;
-  --warning-light: #451a03;
+  --warning: #e5a04a;
+  --warning-light: #38270e;
 
-  --danger: #f87171;
-  --danger-light: #450a0a;
+  --danger: #ee7e72;
+  --danger-light: #3d1b17;
 
-  --info: #38bdf8;
-  --info-light: #082f49;
+  --info: #6fb4d1;
+  --info-light: #142c38;
 
-  --ring: #3b82f6;
+  --ring: #6fc2a9;
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.25);
-  --shadow-lg: 0 12px 28px -8px rgb(0 0 0 / 0.35);
+  --shadow-sm: 0 1px 0 0 rgb(0 0 0 / 0.25);
+  --shadow-md: 0 2px 8px -1px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 16px 36px -12px rgb(0 0 0 / 0.5);
 }
 
 /* =========================================
-   4. GLOBAL RESET
+   4. BASE
 ========================================= */
 
 * {
@@ -160,29 +180,31 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
 
   background-color: var(--background);
   color: var(--foreground);
 
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 16px;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem; /* 15px */
   line-height: 1.6;
+  font-feature-settings: "kern", "liga", "calt";
+  text-rendering: optimizeLegibility;
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
 }
 
 /* =========================================
-   5. HEADINGS AND TEXT
+   5. TYPOGRAPHY
+   Compact scale suited to a content-heavy app.
+   Tight display tracking, balanced wrapping.
 ========================================= */
 
 h1,
@@ -192,22 +214,73 @@ h4,
 h5,
 h6 {
   color: var(--foreground);
-  font-weight: 700;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem); /* 28 to 36px */
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.625rem); /* 22 to 26px */
+}
+
+h3 {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.3;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 1rem; /* 16px */
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 
 p {
   color: inherit;
+  text-wrap: pretty;
+}
+
+small {
+  font-size: 0.8125rem;
 }
 
 a {
   color: var(--primary);
-  text-decoration: none;
-  transition: color 0.2s ease;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 0.2em;
+  transition:
+    color 0.15s ease,
+    text-decoration-color 0.15s ease;
 }
 
 a:hover {
   color: var(--primary-hover);
+  text-decoration-color: currentColor;
+}
+
+/* Links styled as buttons, nav items, or cards opt out of underlines */
+a.btn-primary,
+a.btn-accent,
+a.btn-quiet,
+nav a,
+a.card {
+  text-decoration: none;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
 }
 
 /* =========================================
@@ -215,30 +288,36 @@ a:hover {
 ========================================= */
 
 ::selection {
-  background-color: var(--primary);
-  color: #ffffff;
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--background);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background-color: var(--border-strong);
   border-radius: 999px;
+  border: 3px solid var(--background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted);
+  background-color: var(--muted-foreground);
 }
 
 /* =========================================
-   7. FORM ELEMENTS
+   7. FORMS
 ========================================= */
 
 input,
@@ -246,6 +325,7 @@ textarea,
 select,
 button {
   font: inherit;
+  letter-spacing: inherit;
 }
 
 input,
@@ -253,7 +333,25 @@ textarea,
 select {
   color: var(--foreground);
   background-color: var(--surface);
-  border-color: var(--border);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: var(--muted-foreground);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
 }
 
 input::placeholder,
@@ -265,38 +363,52 @@ button {
   cursor: pointer;
 }
 
-button:disabled {
+button:disabled,
+[aria-disabled="true"] {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
 /* =========================================
-   8. REUSABLE UI CLASSES
+   8. SURFACES
+   Borders carry structure; shadow only
+   appears where something actually floats.
 ========================================= */
 
 .card {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
 }
 
+/* Raised: menus, popovers, dialogs */
+.card-raised {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Interactive cards respond with a border change, not a lift */
 .card-hover {
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+  background-color: color-mix(
+    in srgb,
+    var(--primary-light) 40%,
+    var(--surface)
+  );
 }
 
 .text-muted {
@@ -307,64 +419,77 @@ button:disabled {
   border-color: var(--border);
 }
 
+.prose-measure {
+  max-width: var(--measure);
+}
+
 /* =========================================
-   9. BUTTON STYLES
+   9. BUTTONS
+   Primary is pine, accent is marigold with
+   dark text (white on yellow fails contrast).
 ========================================= */
 
-.btn-primary {
+.btn-primary,
+.btn-accent,
+.btn-quiet {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 
-  padding: 0.625rem 1.125rem;
-
-  background-color: var(--primary);
-  color: #ffffff;
+  padding: 0.5rem 1rem;
 
   border: 1px solid transparent;
-  border-radius: 0.625rem;
+  border-radius: var(--radius-sm);
 
-  font-weight: 600;
+  font-weight: 550;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
 
   transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--surface);
 }
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  color: #ffffff;
-}
-
-.btn-primary:active {
-  transform: scale(0.98);
+  color: var(--surface);
 }
 
 .btn-accent {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  padding: 0.625rem 1.125rem;
-
   background-color: var(--accent);
-  color: #ffffff;
-
-  border: 1px solid transparent;
-  border-radius: 0.625rem;
-
-  font-weight: 600;
-
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  color: var(--accent-foreground);
 }
 
 .btn-accent:hover {
   background-color: var(--accent-hover);
-  color: #ffffff;
+  color: var(--accent-foreground);
+}
+
+/* Secondary: outlined, for the less important action in a pair */
+.btn-quiet {
+  background-color: transparent;
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+
+.btn-quiet:hover {
+  background-color: var(--surface-secondary);
+  color: var(--foreground);
+}
+
+.btn-primary:active,
+.btn-accent:active,
+.btn-quiet:active {
+  transform: translateY(1px);
 }
 
 /* =========================================
