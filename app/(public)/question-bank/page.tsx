@@ -1,10 +1,8 @@
 import { Suspense } from "react";
 
 import QuestionBank from "@/app/Components/questionBank/QuestionBank";
-import { getResourcesAction } from "@/actions/resource";
 import { getCurrentUserAction } from "@/actions/auth";
 
-// Shown while the question papers are loading
 function QuestionBankLoading() {
   return (
     <main className="min-h-screen bg-background">
@@ -30,19 +28,10 @@ function QuestionBankLoading() {
   );
 }
 
-// Fetches the data on the server, then hands it to the UI component
 async function QuestionBankContent() {
-  const [resourceResult, auth] = await Promise.all([
-    getResourcesAction({ resourceType: "Question Paper" }),
-    getCurrentUserAction(),
-  ]);
+  const auth = await getCurrentUserAction();
 
-  return (
-    <QuestionBank
-      questions={resourceResult.resources ?? []}
-      isLoggedIn={auth.success}
-    />
-  );
+  return <QuestionBank isLoggedIn={auth.success} />;
 }
 
 export default function Page() {
