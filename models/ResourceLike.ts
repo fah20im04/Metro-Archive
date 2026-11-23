@@ -1,4 +1,3 @@
-
 import mongoose, { Schema, Model } from "mongoose";
 
 export interface IResourceLike {
@@ -26,7 +25,7 @@ const resourceLikeSchema = new Schema<IResourceLike>(
   }
 );
 
-// A student can like a resource only once
+// A user can like a resource only once.
 resourceLikeSchema.index(
   { resourceId: 1, userId: 1 },
   { unique: true }

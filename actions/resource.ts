@@ -408,165 +408,210 @@
   // Like if not liked; unlike if already liked
   // --------------------------------------------------
 
-  export async function toggleResourceLikeAction(
-    resourceId: string
-  ) {
-    let session: mongoose.ClientSession | null = null;
 
-    try {
-      const auth = await getCurrentUserAction();
 
-      if (!auth.success || !auth.user) {
-        return {
-          success: false,
-          message: "Please login to like resources.",
-        };
-      }
+// Toggle resource like
 
-      if (auth.user.role !== "student") {
-        return {
-          success: false,
-          message: "Only students can like resources.",
-        };
-      }
+export async function toggleResourceLikeAction(
+  resourceId: string
+): Promise<
+  | {
+      success: true;
+      message: string;
+      hasLiked: boolean;
+      likeCount: number;
+    }
+  | {
+      success: false;
+      message: string;
+    }
+> {
+  let session: mongoose.ClientSession | null = null;
 
-      if (!isValidId(resourceId)) {
-        return {
-          success: false,
-          message: "Invalid resource ID.",
-        };
-      }
+  try {
+    // 1. Authenticate user
+    const auth = await getCurrentUserAction();
 
-      await connectDB();
-
-      session = await mongoose.startSession();
-
-      let result: {
-        hasLiked: boolean;
-        likeCount: number;
-      } | null = null;
-
-      await session.withTransaction(async () => {
-        const resource = await Resource.findById(resourceId)
-          .session(session!);
-
-        if (!resource) {
-          throw new Error("RESOURCE_NOT_FOUND");
-        }
-
-        const existingLike = await ResourceLike.findOne({
-          resourceId,
-          userId: auth.user!.id,
-        }).session(session!);
-
-        if (existingLike) {
-          await ResourceLike.deleteOne(
-            { _id: existingLike._id },
-            { session: session! }
-          );
-
-          resource.likeCount = Math.max(0, resource.likeCount - 1);
-          await resource.save({ session });
-
-          result = {
-            hasLiked: false,
-            likeCount: resource.likeCount,
-          };
-        } else {
-          await ResourceLike.create(
-            [
-              {
-                resourceId,
-                userId: auth.user!.id,
-              },
-            ],
-            { session }
-          );
-
-          resource.likeCount += 1;
-          await resource.save({ session });
-
-          result = {
-            hasLiked: true,
-            likeCount: resource.likeCount,
-          };
-        }
-      });
-
-      refreshResourcePaths();
-      revalidatePath(`/resources/${resourceId}`);
-
-      return {
-        success: true,
-        message: result!.hasLiked
-          ? "Resource liked."
-          : "Like removed.",
-        ...result!,
-      };
-    } catch (error) {
-      if (error instanceof Error && error.message === "RESOURCE_NOT_FOUND") {
-        return {
-          success: false,
-          message: "Resource not found.",
-        };
-      }
-
-      console.error("Toggle resource like error:", error);
-
+    if (!auth.success || !auth.user) {
       return {
         success: false,
-        message: "Failed to update like. Please try again.",
+        message: "Please login to like resources.",
       };
-    } finally {
-      await session?.endSession();
     }
-  }
 
-  // --------------------------------------------------
-  // 8. GET RESOURCE LIKE STATUS
-  // --------------------------------------------------
+    // 2. Only students can like resources
+    if (auth.user.role !== "student") {
+      return {
+        success: false,
+        message: "Only students can like resources.",
+      };
+    }
 
-  export async function getResourceLikeStatusAction(
-    resourceId: string
-  ) {
-    try {
-      if (!isValidId(resourceId)) {
+    // 3. Validate resource ID
+    if (
+      !mongoose.Types.ObjectId.isValid(resourceId) ||
+      !mongoose.Types.ObjectId.isValid(auth.user.id)
+    ) {
+      return {
+        success: false,
+        message: "Invalid resource or user ID.",
+      };
+    }
+
+    await connectDB();
+
+    const resourceObjectId = new mongoose.Types.ObjectId(resourceId);
+    const userObjectId = new mongoose.Types.ObjectId(auth.user.id);
+
+    session = await mongoose.startSession();
+
+    // 4. Execute transaction and return its result directly
+    const result = await session.withTransaction(async () => {
+      const resource = await Resource.findById(resourceObjectId).session(
+        session!
+      );
+
+      if (!resource) {
+        throw new Error("RESOURCE_NOT_FOUND");
+      }
+
+      const existingLike = await ResourceLike.findOne({
+        resourceId: resourceObjectId,
+        userId: userObjectId,
+      }).session(session!);
+
+      if (existingLike) {
+        // Unlike
+        await ResourceLike.deleteOne({
+          _id: existingLike._id,
+        }).session(session!);
+
+        resource.likeCount = Math.max(0, resource.likeCount - 1);
+
+        await resource.save({ session });
+
         return {
-          success: false,
           hasLiked: false,
-          isLoggedIn: false,
+          likeCount: resource.likeCount,
         };
       }
 
-      const auth = await getCurrentUserAction();
+      // Like
+      await ResourceLike.create(
+        [
+          {
+            resourceId: resourceObjectId,
+            userId: userObjectId,
+          },
+        ],
+        { session }
+      );
 
-      if (!auth.success || !auth.user) {
-        return {
-          success: true,
-          hasLiked: false,
-          isLoggedIn: false,
-        };
-      }
+      resource.likeCount += 1;
 
-      await connectDB();
-
-      const like = await ResourceLike.exists({
-        resourceId,
-        userId: auth.user.id,
-      });
+      await resource.save({ session });
 
       return {
-        success: true,
-        hasLiked: !!like,
-        isLoggedIn: true,
+        hasLiked: true,
+        likeCount: resource.likeCount,
       };
-    } catch (error) {
-      console.error("Get resource like status error:", error);
+    });
 
+    // 5. Check transaction result
+    if (!result) {
+      return {
+        success: false,
+        message: "Failed to update like.",
+      };
+    }
+
+    // 6. Revalidate pages
+    revalidatePath("/resources");
+    revalidatePath("/dashboard");
+    revalidatePath(`/resources/${resourceId}`);
+
+    // 7. Return success
+    return {
+      success: true,
+      message: result.hasLiked
+        ? "Resource liked."
+        : "Like removed.",
+      hasLiked: result.hasLiked,
+      likeCount: result.likeCount,
+    };
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "RESOURCE_NOT_FOUND"
+    ) {
+      return {
+        success: false,
+        message: "Resource not found.",
+      };
+    }
+
+    console.error("Toggle resource like error:", error);
+
+    return {
+      success: false,
+      message: "Failed to update like. Please try again.",
+    };
+  } finally {
+    await session?.endSession();
+  }
+}
+
+// Get resource like status
+export async function getResourceLikeStatusAction(resourceId: string) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(resourceId)) {
       return {
         success: false,
         hasLiked: false,
         isLoggedIn: false,
       };
     }
+
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return {
+        success: true,
+        hasLiked: false,
+        isLoggedIn: false,
+      };
+    }
+
+    if (auth.user.role !== "student") {
+      return {
+        success: true,
+        hasLiked: false,
+        isLoggedIn: true,
+      };
+    }
+
+    await connectDB();
+
+    const userObjectId = new mongoose.Types.ObjectId(auth.user.id);
+    const resourceObjectId = new mongoose.Types.ObjectId(resourceId);
+
+    const like = await ResourceLike.exists({
+      resourceId: resourceObjectId,
+      userId: userObjectId,
+    });
+
+    return {
+      success: true,
+      hasLiked: !!like,
+      isLoggedIn: true,
+    };
+  } catch (error) {
+    console.error("Get resource like status error:", error);
+
+    return {
+      success: false,
+      hasLiked: false,
+      isLoggedIn: false,
+    };
   }
+}
