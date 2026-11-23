@@ -127,7 +127,7 @@ export default function DashboardSidebar({
         {/* Logo */}
         <div className="flex h-18 items-center justify-between border-b border-border px-6">
           <Link
-            href="/dashboard"
+            href="/"
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-3"
           >
@@ -135,10 +135,10 @@ export default function DashboardSidebar({
               <GraduationCap size={23} />
             </div>
 
-            <Link href="/" className="block">
+            <div className="block">
               <h2 className="text-lg font-bold tracking-tight">MUArchive</h2>
               <p className="text-[11px] text-muted">University Archive</p>
-            </Link>
+            </div>
           </Link>
 
           <button
