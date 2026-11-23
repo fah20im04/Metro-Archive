@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRight,
-  GraduationCap,
   Menu,
   X,
   Sun,
@@ -39,6 +38,8 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
 
   const { resolvedTheme, setTheme } = useTheme();
 
+  const pathname = usePathname();
+
   const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -58,12 +59,17 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     { label: "Home", href: "/" },
     ...(isLoggedIn
       ? [
-          { label: "Archives", href: "/archives" },
-          { label: "Question Bank", href: "/questionBank" },
-        ]
+        { label: "Archives", href: "/archives" },
+        { label: "Question Bank", href: "/questionBank" },
+      ]
       : []),
     { label: "Faculty", href: "/faculty" },
   ];
+
+  // A link is active on its own route and on any nested route
+  // (e.g. /faculty/123 keeps "Faculty" highlighted). "/" matches only itself.
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   // Theme toggle
   const toggleTheme = () => {
@@ -139,13 +145,13 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
           href="/"
           onClick={closeMenus}
           className="flex shrink-0 items-center gap-2.5"
-        > 
+        >
 
           {/* MU Logo */}
           <div className="relative h-10 w-16 overflow-hidden">
             {/* <Image src="/svg.webp" alt="description" fill className="object-cover" /> */}
             <Image src={'/mu_logo.png'} alt="Metropolitan University logo"
-            fill className="object-cover rounded-xl"
+              fill className="object-cover rounded-xl"
             />
           </div>
 
@@ -160,11 +166,11 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm transition-colors ${
-                link.href === "/"
-                  ? "font-semibold text-primary"
-                  : "font-medium text-muted hover:text-primary"
-              }`}
+              aria-current={isActive(link.href) ? "page" : undefined}
+              className={`text-sm transition-colors ${isActive(link.href)
+                ? "font-semibold text-primary"
+                : "font-medium text-muted hover:text-primary"
+                }`}
             >
               {link.label}
             </Link>
@@ -282,11 +288,11 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                 key={link.href}
                 href={link.href}
                 onClick={closeMenus}
-                className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                  link.href === "/"
-                    ? "bg-primary-light text-primary"
-                    : "text-foreground hover:bg-surface-secondary hover:text-primary"
-                }`}
+                aria-current={isActive(link.href) ? "page" : undefined}
+                className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive(link.href)
+                  ? "bg-primary-light text-primary"
+                  : "text-foreground hover:bg-surface-secondary hover:text-primary"
+                  }`}
               >
                 {link.label}
               </Link>
