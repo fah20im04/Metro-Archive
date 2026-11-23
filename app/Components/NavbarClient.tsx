@@ -60,7 +60,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
     ...(isLoggedIn
       ? [
         { label: "Archives", href: "/archives" },
-        { label: "Question Bank", href: "/questionBank" },
+        { label: "Question Bank", href: "/question-bank" },
       ]
       : []),
     { label: "Faculty", href: "/faculty" },
@@ -128,7 +128,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
       className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-foreground transition-colors hover:bg-surface-secondary disabled:cursor-default"
     >
       {!mounted ? (
-        <span className="h-[19px] w-[19px]" />
+        <span className="h-4.75 w-4.75" />
       ) : isDark ? (
         <Sun size={19} />
       ) : (
@@ -253,7 +253,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
 
               <Link
                 href="/auth/register"
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold !text-white transition hover:bg-blue-700"
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
               >
                 Get Started
                 <ArrowRight size={16} />
@@ -347,7 +347,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   <Link
                     href="/auth/register"
                     onClick={closeMenus}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold !text-white transition hover:bg-blue-700"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white! transition hover:bg-blue-700"
                   >
                     Get Started
                     <ArrowRight size={16} />
