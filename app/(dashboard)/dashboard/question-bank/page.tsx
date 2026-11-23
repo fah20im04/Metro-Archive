@@ -1,0 +1,47 @@
+import { Suspense } from "react";
+
+import QuestionBank from "@/app/Components/Dashboard/questionBank/QuestionBank";
+import { getMyResourcesAction } from "@/actions/resource";
+
+// Shown while the user's question papers are loading
+function QuestionBankLoading() {
+  return (
+    <div className="animate-pulse space-y-8">
+      <div className="space-y-3">
+        <div className="h-4 w-32 rounded bg-surface-secondary" />
+        <div className="h-8 w-64 rounded bg-surface-secondary" />
+        <div className="h-4 w-80 max-w-full rounded bg-surface-secondary" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-52 rounded-xl border border-border bg-surface-secondary"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Fetches the current user's uploads on the server, keeps only the
+// question papers, then hands them to the UI component
+async function QuestionBankContent() {
+  const result = await getMyResourcesAction();
+
+  const questions = (result.resources ?? []).filter(
+    (resource: { resourceType?: string }) =>
+      resource.resourceType === "Question Paper",
+  );
+
+  return <QuestionBank questions={questions} />;
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<QuestionBankLoading />}>
+      <QuestionBankContent />
+    </Suspense>
+  );
+}

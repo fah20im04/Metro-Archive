@@ -69,7 +69,7 @@ export default function DashboardTopbar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-border bg-background/90 px-4 pl-16 backdrop-blur-md sm:px-6 sm:pl-20 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b border-border bg-background/90 px-4 pl-16 backdrop-blur-md sm:px-6 sm:pl-20 lg:px-8">
       {/* Page Title */}
       <div>
         <div className="flex items-center gap-2">

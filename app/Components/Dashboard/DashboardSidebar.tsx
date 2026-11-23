@@ -121,14 +121,13 @@ export default function DashboardSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[260px] flex-col border-r border-border bg-surface transition-transform duration-300 lg:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-65 flex-col border-r border-border bg-surface transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Logo */}
-        <div className="flex h-[72px] items-center justify-between border-b border-border px-6">
+        <div className="flex h-18 items-center justify-between border-b border-border px-6">
           <Link
-            href="/dashboard"
+            href="/"
             onClick={() => setMobileOpen(false)}
             className="flex items-center gap-3"
           >
@@ -136,10 +135,10 @@ export default function DashboardSidebar({
               <GraduationCap size={23} />
             </div>
 
-            <Link href="/" className="block">
+            <div className="block">
               <h2 className="text-lg font-bold tracking-tight">MUArchive</h2>
               <p className="text-[11px] text-muted">University Archive</p>
-            </Link>
+            </div>
           </Link>
 
           <button
@@ -168,11 +167,10 @@ export default function DashboardSidebar({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-                    active
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-muted hover:bg-surface-secondary hover:text-foreground"
-                  }`}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${active
+                    ? "bg-primary text-white! shadow-sm"
+                    : "text-muted! hover:bg-surface-secondary hover:text-foreground!"
+                    }`}
                 >
                   <Icon size={19} />
 
@@ -195,11 +193,10 @@ export default function DashboardSidebar({
           <Link
             href="/dashboard/settings"
             onClick={() => setMobileOpen(false)}
-            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-              isActive("/dashboard/settings")
-                ? "bg-primary text-white"
-                : "text-muted hover:bg-surface-secondary hover:text-foreground"
-            }`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${isActive("/dashboard/settings")
+                ? "bg-primary text-white!"
+                : "text-muted! hover:bg-surface-secondary hover:text-foreground!"
+              }`}
           >
             <Settings size={19} />
             Settings
@@ -215,7 +212,7 @@ export default function DashboardSidebar({
             </div>
 
             <p className="mt-2 text-xs leading-relaxed text-muted">
-              Your university's academic resources, organized in one place.
+              Your university&apos;s academic resources, organized in one place.
             </p>
           </div>
         </div>

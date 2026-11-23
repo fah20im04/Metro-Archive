@@ -275,11 +275,10 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  activeFilter === filter
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${activeFilter === filter
                     ? "bg-primary text-white"
                     : "border border-border bg-surface text-muted hover:border-primary hover:text-primary"
-                }`}
+                  }`}
               >
                 {filter}
               </button>
