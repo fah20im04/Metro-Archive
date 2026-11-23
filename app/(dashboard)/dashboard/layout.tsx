@@ -35,7 +35,7 @@ export default function DashboardLayout({
         <div className="min-h-screen bg-background text-foreground">
           <DashboardSidebar />
 
-          <div className="min-h-screen lg:pl-[260px]">
+          <div className="min-h-screen lg:pl-65">
             <DashboardTopbar />
 
             <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">

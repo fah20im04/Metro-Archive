@@ -163,11 +163,10 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                  activeFilter === filter
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${activeFilter === filter
                     ? "bg-primary text-white"
                     : "border border-border bg-surface text-muted hover:border-primary hover:text-primary"
-                }`}
+                  }`}
               >
                 {filter}
               </button>
@@ -238,7 +237,7 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
                   href={resource.driveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition group-hover:border-primary group-hover:bg-primary group-hover:text-white"
+                  className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground! no-underline! transition group-hover:border-primary group-hover:bg-primary group-hover:text-white!"
                 >
                   View Resource
                   <ArrowUpRight size={17} />
