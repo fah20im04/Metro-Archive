@@ -2,12 +2,10 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 
 import { getCurrentUserAction } from "@/actions/auth";
+
 import DashboardSidebar from "@/app/Components/Dashboard/DashboardSidebar";
 import DashboardTopbar from "@/app/Components/Dashboard/DashboardTopbar";
 
-// Redirects to the login page unless the user has a valid, active session.
-// Reading the session cookie happens at request time, so this runs
-// inside <Suspense> (required by cacheComponents).
 async function AuthGate({ children }: { children: React.ReactNode }) {
   const auth = await getCurrentUserAction();
 
@@ -15,7 +13,29 @@ async function AuthGate({ children }: { children: React.ReactNode }) {
     redirect("/auth/login");
   }
 
-  return <>{children}</>;
+  const user = auth.user;
+
+  if (
+    user.role !== "student" &&
+    user.role !== "faculty" &&
+    user.role !== "admin"
+  ) {
+    redirect("/auth/login");
+  }
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <DashboardSidebar role={user.role} />
+
+      <div className="min-h-screen lg:pl-65">
+        <DashboardTopbar user={user} />
+
+        <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }
 
 export default function DashboardLayout({
@@ -31,19 +51,7 @@ export default function DashboardLayout({
         </div>
       }
     >
-      <AuthGate>
-        <div className="min-h-screen bg-background text-foreground">
-          <DashboardSidebar />
-
-          <div className="min-h-screen lg:pl-65">
-            <DashboardTopbar />
-
-            <main className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
-              {children}
-            </main>
-          </div>
-        </div>
-      </AuthGate>
+      <AuthGate>{children}</AuthGate>
     </Suspense>
   );
 }

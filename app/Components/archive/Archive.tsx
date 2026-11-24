@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Search,
   FolderOpen,
@@ -11,6 +11,12 @@ import {
   GraduationCap,
   Heart,
 } from "lucide-react";
+import { toast } from "sonner";
+
+import {
+  toggleResourceLikeAction,
+  getResourceLikeStatusAction,
+} from "@/actions/resource";
 
 export interface ResourceItem {
   _id: string;
@@ -33,11 +39,117 @@ interface ArchiveProps {
   isLoggedIn: boolean;
 }
 
+interface LikeState {
+  hasLiked: boolean;
+  likeCount: number;
+}
+
 const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
+  const [likeStates, setLikeStates] = useState<Record<string, LikeState>>({});
+  const [likingResources, setLikingResources] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filters = ["All", "CSE", "BBA", "EEE", "Other"];
+
+  // Initialize like counts from the database resources
+  useEffect(() => {
+    const initialStates: Record<string, LikeState> = {};
+
+    resources.forEach((resource) => {
+      initialStates[resource._id] = {
+        hasLiked: false,
+        likeCount: resource.likeCount ?? 0,
+      };
+    });
+
+    setLikeStates(initialStates);
+  }, [resources]);
+
+  // Fetch the current user's like status
+  useEffect(() => {
+    if (!isLoggedIn || resources.length === 0) return;
+
+    let cancelled = false;
+
+    const fetchLikeStatuses = async () => {
+      try {
+        const results = await Promise.all(
+          resources.map(async (resource) => {
+            const result = await getResourceLikeStatusAction(resource._id);
+
+            return {
+              id: resource._id,
+              hasLiked: result.success ? result.hasLiked : false,
+            };
+          }),
+        );
+
+        if (cancelled) return;
+
+        setLikeStates((prev) => {
+          const updated = { ...prev };
+
+          results.forEach(({ id, hasLiked }) => {
+            updated[id] = {
+              hasLiked,
+              likeCount:
+                updated[id]?.likeCount ??
+                resources.find((resource) => resource._id === id)?.likeCount ??
+                0,
+            };
+          });
+
+          return updated;
+        });
+      } catch (error) {
+        console.error("Fetch like statuses error:", error);
+      }
+    };
+
+    fetchLikeStatuses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resources, isLoggedIn]);
+
+  // Handle like and unlike
+  const handleLike = async (resourceId: string) => {
+    if (!isLoggedIn) {
+      toast.error("Please login to like resources.");
+      return;
+    }
+
+    if (likingResources.includes(resourceId)) return;
+
+    setLikingResources((prev) => [...prev, resourceId]);
+
+    try {
+      const result = await toggleResourceLikeAction(resourceId);
+
+      // TypeScript narrows the result here
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      setLikeStates((prev) => ({
+        ...prev,
+        [resourceId]: {
+          hasLiked: result.hasLiked,
+          likeCount: result.likeCount,
+        },
+      }));
+
+      toast.success(result.message);
+    } catch (error) {
+      console.error("Toggle like error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLikingResources((prev) => prev.filter((id) => id !== resourceId));
+    }
+  };
 
   // Calculate overview statistics from resources
   const stats = useMemo(() => {
@@ -185,70 +297,92 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {filteredResources.map((resource) => (
-            <div
-              key={resource._id}
-              className="card group flex flex-col rounded-xl p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-            >
-              {/* Card Header */}
-              <div className="mb-5 flex items-start justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
-                  <GraduationCap size={25} />
-                </div>
+          {filteredResources.map((resource) => {
+            const likeState = likeStates[resource._id];
+            const hasLiked = likeState?.hasLiked ?? false;
+            const likeCount = likeState?.likeCount ?? resource.likeCount ?? 0;
+            const isLiking = likingResources.includes(resource._id);
 
-                <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
-                  {resource.departmentCode || "General"}
-                </span>
-              </div>
+            return (
+              <div
+                key={resource._id}
+                className="card group flex flex-col rounded-xl p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+              >
+                {/* Card Header */}
+                <div className="mb-5 flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
+                    <GraduationCap size={25} />
+                  </div>
 
-              {/* Resource Details */}
-              <h3 className="text-lg font-bold tracking-tight">
-                {resource.resourceTitle}
-              </h3>
-
-              <p className="mt-1 text-xs font-medium text-primary">
-                {resource.courseCode} · {resource.courseName}
-              </p>
-
-              <div className="mt-3">
-                <span className="inline-flex rounded-md bg-accent-light px-2.5 py-1 text-xs font-medium text-accent">
-                  {resource.resourceType}
-                </span>
-              </div>
-
-              {/* Uploader and Likes */}
-              <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-                <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
-                  <Users size={15} className="shrink-0" />
-                  <span className="truncate">
-                    {resource.uploadedBy?.name || "Unknown contributor"}
+                  <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
+                    {resource.departmentCode || "General"}
                   </span>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1.5 text-xs text-muted">
-                  <Heart size={15} />
-                  {resource.likeCount || 0}
-                </div>
-              </div>
+                {/* Resource Details */}
+                <h3 className="text-lg font-bold tracking-tight">
+                  {resource.resourceTitle}
+                </h3>
 
-              {/* Open Resource */}
-              {resource.driveUrl ? (
-                <a
-                  href={resource.driveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground! no-underline! transition group-hover:border-primary group-hover:bg-primary group-hover:text-white!"
-                >
-                  View Resource
-                  <ArrowUpRight size={17} />
-                </a>
-              ) : (
-                <div className="mt-5 rounded-lg border border-border px-4 py-2.5 text-center text-sm text-muted">
-                  Resource link unavailable
+                <p className="mt-1 text-xs font-medium text-primary">
+                  {resource.courseCode} · {resource.courseName}
+                </p>
+
+                <div className="mt-3">
+                  <span className="inline-flex rounded-md bg-accent-light px-2.5 py-1 text-xs font-medium text-accent">
+                    {resource.resourceType}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {/* Uploader and Likes */}
+                <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                  <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+                    <Users size={15} className="shrink-0" />
+                    <span className="truncate">
+                      {resource.uploadedBy?.name || "Unknown contributor"}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLike(resource._id)}
+                    disabled={isLiking}
+                    aria-label={hasLiked ? "Unlike resource" : "Like resource"}
+                    aria-pressed={hasLiked}
+                    title={hasLiked ? "Unlike" : "Like"}
+                    className={`flex shrink-0 items-center gap-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      hasLiked
+                        ? "text-red-500"
+                        : "text-muted hover:text-red-500"
+                    }`}
+                  >
+                    <Heart
+                      size={15}
+                      fill={hasLiked ? "currentColor" : "none"}
+                    />
+                    {likeCount}
+                  </button>
+                </div>
+
+                {/* Open Resource */}
+                {resource.driveUrl ? (
+                  <a
+                    href={resource.driveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition group-hover:border-primary group-hover:bg-primary group-hover:text-white"
+                  >
+                    View Resource
+                    <ArrowUpRight size={17} />
+                  </a>
+                ) : (
+                  <div className="mt-5 rounded-lg border border-border px-4 py-2.5 text-center text-sm text-muted">
+                    Resource link unavailable
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Empty State */}

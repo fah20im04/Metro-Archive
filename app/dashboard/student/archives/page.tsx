@@ -1,10 +1,9 @@
 import { Suspense } from "react";
 
-import QuestionBank from "@/app/Components/Dashboard/questionBank/QuestionBank";
+import Archives from "@/app/Components/Dashboard/archives/Archives";
 import { getMyResourcesAction } from "@/actions/resource";
 
-// Shown while the user's question papers are loading
-function QuestionBankLoading() {
+function ArchivesLoading() {
   return (
     <div className="animate-pulse space-y-8">
       <div className="space-y-3">
@@ -17,7 +16,7 @@ function QuestionBankLoading() {
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={index}
-            className="h-52 rounded-xl border border-border bg-surface-secondary"
+            className="h-56 rounded-xl border border-border bg-surface-secondary"
           />
         ))}
       </div>
@@ -25,23 +24,16 @@ function QuestionBankLoading() {
   );
 }
 
-// Fetches the current user's uploads on the server, keeps only the
-// question papers, then hands them to the UI component
-async function QuestionBankContent() {
+async function ArchivesContent() {
   const result = await getMyResourcesAction();
 
-  const questions = (result.resources ?? []).filter(
-    (resource: { resourceType?: string }) =>
-      resource.resourceType === "Question Paper",
-  );
-
-  return <QuestionBank questions={questions} />;
+  return <Archives resources={result.resources ?? []} />;
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<QuestionBankLoading />}>
-      <QuestionBankContent />
+    <Suspense fallback={<ArchivesLoading />}>
+      <ArchivesContent />
     </Suspense>
   );
 }
