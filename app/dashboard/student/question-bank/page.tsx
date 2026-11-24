@@ -1,9 +1,8 @@
 import { Suspense } from "react";
 
 import QuestionBank from "@/app/Components/Dashboard/questionBank/QuestionBank";
-import { getMyResourcesAction } from "@/actions/resource";
+import { getQuestionPapersAction } from "@/actions/questionPaper";
 
-// Shown while the user's question papers are loading
 function QuestionBankLoading() {
   return (
     <div className="animate-pulse space-y-8">
@@ -25,17 +24,10 @@ function QuestionBankLoading() {
   );
 }
 
-// Fetches the current user's uploads on the server, keeps only the
-// question papers, then hands them to the UI component
 async function QuestionBankContent() {
-  const result = await getMyResourcesAction();
+  const result = await getQuestionPapersAction();
 
-  const questions = (result.resources ?? []).filter(
-    (resource: { resourceType?: string }) =>
-      resource.resourceType === "Question Paper",
-  );
-
-  return <QuestionBank questions={questions} />;
+  return <QuestionBank questions={result.papers ?? []} />;
 }
 
 export default function Page() {

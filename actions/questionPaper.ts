@@ -8,6 +8,86 @@ import { questionPaperSchema } from "@/lib/validations/questionPaper";
 import { revalidatePath } from "next/cache";
 import mongoose from "mongoose";
 
+interface GetQuestionPapersFilters {
+  courseName?: string;
+  departmentName?: string;
+  semester?: string;
+  batch?: string;
+  examType?: string;
+  section?: string;
+}
+
+export async function getQuestionPapersAction(
+  filters: GetQuestionPapersFilters = {}
+) {
+  try {
+    // 1. Authenticate user
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return {
+        success: false,
+        message: "Please login to view question papers.",
+        papers: [],
+      };
+    }
+
+    // 2. Connect database
+    await connectDB();
+
+    // 3. Build filters
+    const query: Record<string, unknown> = {};
+
+    if (filters.courseName?.trim()) {
+      query.courseName = {
+        $regex: filters.courseName.trim(),
+        $options: "i",
+      };
+    }
+
+    if (filters.departmentName?.trim()) {
+      query.departmentName = filters.departmentName.trim();
+    }
+
+    if (filters.semester?.trim()) {
+      query.semester = filters.semester.trim();
+    }
+
+    if (filters.batch?.trim()) {
+      query.batch = filters.batch.trim();
+    }
+
+    if (filters.examType?.trim()) {
+      query.examType = filters.examType.trim();
+    }
+
+    if (filters.section?.trim()) {
+      query.section = filters.section.trim();
+    }
+
+    // 4. Fetch question papers
+    const papers = await QuestionPaper.find(query)
+      .populate("uploadedBy", "name universityId")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // 5. Return serialized data
+    return {
+      success: true,
+      message: "Question papers fetched successfully.",
+      papers: JSON.parse(JSON.stringify(papers)),
+    };
+  } catch (error) {
+    console.error("Get question papers error:", error);
+
+    return {
+      success: false,
+      message: "Failed to fetch question papers.",
+      papers: [],
+    };
+  }
+}
+
 export async function createQuestionPaperAction(data: unknown) {
   try {
     // 1. Authenticate user
@@ -89,8 +169,7 @@ export async function createQuestionPaperAction(data: unknown) {
       uploadedBy: new mongoose.Types.ObjectId(auth.user.id),
     });
 
-    revalidatePath("/question-bank");
-
+    revalidatePath("/dashboard/student/question-bank");
     return {
       success: true,
       message: "Question paper uploaded successfully!",
