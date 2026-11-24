@@ -28,60 +28,118 @@
   // Only authenticated students can upload
   // --------------------------------------------------
 
-  export async function createResourceAction(data: unknown) {
-    try {
-      const auth = await getCurrentUserAction();
+interface CreateNoteInput {
+  courseName: string;
+  courseCode: string;
+  departmentCode: string;
+  resourceTitle: string;
+  resourceType: "Notes";
+  driveUrl: string;
+}
 
-      if (!auth.success || !auth.user) {
-        return {
-          success: false,
-          message: "Please login first.",
-        };
-      }
+export async function createNoteAction(data: CreateNoteInput) {
+  try {
+    // 1. Authenticate user
+    const auth = await getCurrentUserAction();
 
-      if (auth.user.role !== "student") {
-        return {
-          success: false,
-          message: "Only students can upload resources.",
-        };
-      }
-
-      const validatedData = createResourceSchema.safeParse(data);
-
-      if (!validatedData.success) {
-        return {
-          success: false,
-          message: "Please check your information.",
-          errors: validatedData.error.flatten().fieldErrors,
-        };
-      }
-
-      await connectDB();
-
-      const resource = await Resource.create({
-        ...validatedData.data,
-        courseCode: validatedData.data.courseCode.toUpperCase(),
-        departmentCode: validatedData.data.departmentCode.toUpperCase(),
-        uploadedBy: auth.user.id,
-        likeCount: 0,
-      });
-
-      refreshResourcePaths();
-
-      return {
-        success: true,
-        message: "Resource uploaded successfully.",
-        resourceId: resource._id.toString(),
-      };
-    } catch (error) {
-      console.error("Create resource error:", error);
-
+    if (!auth.success || !auth.user) {
       return {
         success: false,
-        message: "Something went wrong while uploading the resource.",
+        message: "Please login to upload notes.",
       };
     }
+
+    // 2. Only students can upload notes
+    if (auth.user.role !== "student") {
+      return {
+        success: false,
+        message: "Only students can upload notes.",
+      };
+    }
+
+    // 3. Validate user ID
+    if (!mongoose.Types.ObjectId.isValid(auth.user.id)) {
+      return {
+        success: false,
+        message: "Invalid user information.",
+      };
+    }
+
+    // 4. Validate required fields
+    const {
+      courseName,
+      courseCode,
+      departmentCode,
+      resourceTitle,
+      driveUrl,
+    } = data;
+
+    if (
+      !courseName?.trim() ||
+      !courseCode?.trim() ||
+      !departmentCode?.trim() ||
+      !resourceTitle?.trim() ||
+      !driveUrl?.trim()
+    ) {
+      return {
+        success: false,
+        message: "All fields are required.",
+      };
+    }
+
+    // 5. Validate URL
+    let parsedUrl: URL;
+
+    try {
+      parsedUrl = new URL(driveUrl);
+    } catch {
+      return {
+        success: false,
+        message: "Please provide a valid document URL.",
+      };
+    }
+
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      return {
+        success: false,
+        message: "Invalid document URL.",
+      };
+    }
+
+    // 6. Connect to database
+    await connectDB();
+
+    // 7. Create resource
+    const resource = await Resource.create({
+      courseName: courseName.trim(),
+      courseCode: courseCode.trim().toUpperCase(),
+      departmentCode: departmentCode.trim().toUpperCase(),
+      resourceTitle: resourceTitle.trim(),
+      resourceType: "Notes",
+      driveUrl: parsedUrl.toString(),
+      uploadedBy: new mongoose.Types.ObjectId(auth.user.id),
+    });
+
+    // 8. Revalidate relevant pages
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/student");
+    revalidatePath("/resources");
+
+    return {
+      success: true,
+      message: "Notes uploaded successfully.",
+      resourceId: resource._id.toString(),
+    };
+  } catch (error) {
+    console.error("Create note error:", error);
+
+    return {
+      success: false,
+      message: "Failed to upload notes. Please try again.",
+    };
   }
+}
+
 
   // --------------------------------------------------
   // 2. GET ALL RESOURCES
@@ -402,13 +460,6 @@
       await session?.endSession();
     }
   }
-
-  // --------------------------------------------------
-  // 7. TOGGLE RESOURCE LIKE
-  // Like if not liked; unlike if already liked
-  // --------------------------------------------------
-
-
 
 // Toggle resource like
 

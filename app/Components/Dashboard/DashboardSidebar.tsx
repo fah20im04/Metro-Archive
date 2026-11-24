@@ -20,15 +20,31 @@ import {
 } from "lucide-react";
 
 const studentLinks = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "My Archives", href: "/dashboard/archives", icon: Archive },
-  { label: "Question Bank", href: "/dashboard/question-bank", icon: BookOpen },
+  {
+    label: "Dashboard",
+    href: "/dashboard/student",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "Archives",
+    href: "/dashboard/student/archives",
+    icon: Archive,
+  },
+  {
+    label: "Question Bank",
+    href: "/dashboard/student/question-bank",
+    icon: BookOpen,
+  },
   {
     label: "Faculty Directory",
-    href: "/dashboard/faculty",
+    href: "/faculty",
     icon: GraduationCap,
   },
-  { label: "Saved Resources", href: "/dashboard/bookmarks", icon: Bookmark },
+  {
+    label: "Saved Resources",
+    href: "/dashboard/bookmarks",
+    icon: Bookmark,
+  },
   {
     label: "My Contributions",
     href: "/dashboard/contributions",
@@ -66,32 +82,23 @@ const adminLinks = [
   },
 ];
 
-const facultyLinks = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "My Profile", href: "/dashboard/faculty", icon: GraduationCap },
-  { label: "My Courses", href: "/dashboard/courses", icon: BookOpen },
-  { label: "Student Feedback", href: "/dashboard/feedback", icon: Users },
-  { label: "Resources", href: "/dashboard/resources", icon: Archive },
-];
-
 export default function DashboardSidebar({
-  role = "student",
+  role,
 }: {
-  role?: "student" | "faculty" | "admin";
+  role: "student" | "faculty" | "admin";
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const links =
-    role === "admin"
-      ? adminLinks
-      : role === "faculty"
-        ? facultyLinks
-        : studentLinks;
+  const links = role === "admin" ? adminLinks : studentLinks;
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
-      return pathname === href;
+      return (
+        pathname === "/dashboard" ||
+        pathname === "/dashboard/student" ||
+        pathname === "/dashboard/admin"
+      );
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -121,8 +128,9 @@ export default function DashboardSidebar({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-65 flex-col border-r border-border bg-surface transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-65 flex-col border-r border-border bg-surface transition-transform duration-300 lg:translate-x-0 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Logo */}
         <div className="flex h-18 items-center justify-between border-b border-border px-6">
@@ -135,7 +143,7 @@ export default function DashboardSidebar({
               <GraduationCap size={23} />
             </div>
 
-            <div className="block">
+            <div>
               <h2 className="text-lg font-bold tracking-tight">MUArchive</h2>
               <p className="text-[11px] text-muted">University Archive</p>
             </div>
@@ -154,7 +162,7 @@ export default function DashboardSidebar({
         {/* Navigation */}
         <div className="flex-1 overflow-y-auto px-4 py-6">
           <p className="mb-4 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted">
-            Main Menu
+            {role === "admin" ? "Administration" : "Student Menu"}
           </p>
 
           <nav className="space-y-1">
@@ -167,10 +175,11 @@ export default function DashboardSidebar({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${active
-                    ? "bg-primary text-white! shadow-sm"
-                    : "text-muted! hover:bg-surface-secondary hover:text-foreground!"
-                    }`}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${
+                    active
+                      ? "bg-primary text-white! shadow-sm"
+                      : "text-muted! hover:bg-surface-secondary hover:text-foreground!"
+                  }`}
                 >
                   <Icon size={19} />
 
@@ -193,10 +202,11 @@ export default function DashboardSidebar({
           <Link
             href="/dashboard/settings"
             onClick={() => setMobileOpen(false)}
-            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${isActive("/dashboard/settings")
+            className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium no-underline! transition ${
+              isActive("/dashboard/settings")
                 ? "bg-primary text-white!"
                 : "text-muted! hover:bg-surface-secondary hover:text-foreground!"
-              }`}
+            }`}
           >
             <Settings size={19} />
             Settings

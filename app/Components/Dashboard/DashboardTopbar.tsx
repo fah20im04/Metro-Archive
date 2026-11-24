@@ -18,12 +18,17 @@ import { logoutAction } from "@/actions/auth";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard Overview",
-  "/dashboard/archives": "My Archives",
-  "/dashboard/question-bank": "Question Bank",
-  "/dashboard/faculty": "Faculty",
+  "/dashboard/student": "Student Overview",
+  "/dashboard/admin": "Admin Overview",
+
+  "/dashboard/student/archives": "My Archives",
+  "/dashboard/student/question-bank": "Question Bank",
+
+  "/dashboard/faculty": "Faculty Directory",
   "/dashboard/bookmarks": "Saved Resources",
   "/dashboard/contributions": "My Contributions",
   "/dashboard/settings": "Settings",
+
   "/dashboard/admin/users": "User Management",
   "/dashboard/admin/faculty": "Faculty Management",
   "/dashboard/admin/archives": "Archive Management",
@@ -32,40 +37,38 @@ const pageTitles: Record<string, string> = {
   "/dashboard/admin/reports": "Reports & Analytics",
 };
 
-export default function DashboardTopbar() {
+import type { UserRole } from "@/models/user";
+
+interface DashboardTopbarProps {
+  user: {
+    id: string;
+    name: string;
+    universityId: string;
+    email: string;
+    role: UserRole;
+    departmentId: string | null;
+    batch: string | null;
+    accountStatus: "active";
+    createdAt: string;
+  };
+}
+
+export default function DashboardTopbar({ user }: DashboardTopbarProps) {
+  console.log("user info", user);
+
   const pathname = usePathname();
   const router = useRouter();
 
   const { resolvedTheme, setTheme } = useTheme();
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
 
   const isDark = resolvedTheme === "dark";
+
   const pageTitle = pageTitles[pathname] || "Dashboard";
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark");
-  };
-
-  const handleLogout = async () => {
-    if (loggingOut) return;
-
-    setLoggingOut(true);
-
-    try {
-      const result = await logoutAction();
-
-      if (result.success) {
-        router.replace("/auth/login");
-        router.refresh();
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      setLoggingOut(false);
-      setProfileOpen(false);
-    }
   };
 
   return (
@@ -79,7 +82,9 @@ export default function DashboardTopbar() {
         </div>
 
         <p className="mt-1 hidden text-xs text-muted sm:block">
-          Manage your university archive.
+          {user.role === "admin"
+            ? "Manage your university platform."
+            : "Manage your academic resources and activities."}
         </p>
       </div>
 
@@ -117,8 +122,8 @@ export default function DashboardTopbar() {
               <UserRound size={17} />
             </div>
 
-            <span className="hidden text-sm font-medium sm:block">
-              My Account
+            <span className="hidden max-w-32 truncate text-sm font-medium sm:block">
+              {user.name}
             </span>
 
             <ChevronDown
@@ -139,10 +144,17 @@ export default function DashboardTopbar() {
                 className="fixed inset-0 z-40 cursor-default"
               />
 
-              <div className="absolute right-0 top-12 z-50 w-52 rounded-xl border border-border bg-surface p-2 shadow-xl">
+              <div className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-border bg-surface p-2 shadow-xl">
                 <div className="border-b border-border px-3 py-3">
-                  <p className="text-sm font-semibold">My Account</p>
-                  <p className="mt-1 text-xs text-muted">Manage your account</p>
+                  <p className="truncate text-sm font-semibold">{user.name}</p>
+
+                  <p className="mt-1 truncate text-xs text-muted">
+                    {user.email}
+                  </p>
+
+                  <span className="mt-2 inline-flex rounded-lg bg-primary-light px-2.5 py-1 text-[11px] font-semibold capitalize text-primary">
+                    {user.role}
+                  </span>
                 </div>
 
                 <button
@@ -155,16 +167,6 @@ export default function DashboardTopbar() {
                 >
                   <Settings size={17} />
                   Settings
-                </button>
-
-                <button
-                  type="button"
-                  disabled={loggingOut}
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-500/10 disabled:opacity-50"
-                >
-                  <LogOut size={17} />
-                  {loggingOut ? "Logging out..." : "Logout"}
                 </button>
               </div>
             </>
