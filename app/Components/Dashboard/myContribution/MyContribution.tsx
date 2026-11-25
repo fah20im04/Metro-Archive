@@ -306,14 +306,6 @@ function EmptyState({ type }: { type: ContributionType }) {
           ? "You haven't shared any notes yet. Upload your study materials to help other students."
           : "You haven't shared any question papers yet. Contribute papers to help your university community."}
       </p>
-
-      <Link
-        href="/dashboard/student/upload"
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white! transition hover:opacity-90"
-      >
-        <Upload size={16} />
-        Upload Material
-      </Link>
     </div>
   );
 }
