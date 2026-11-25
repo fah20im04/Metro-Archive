@@ -5,11 +5,9 @@ import {
   BookOpen,
   FileQuestion,
   Search,
-  Upload,
   FolderOpen,
   GraduationCap,
 } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
 import { getMyResourcesAction } from "@/actions/resource";
