@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import {
-  Search,
-  FolderOpen,
-  Users,
-  FileText,
-  ArrowUpRight,
-  BookOpen,
-  GraduationCap,
-  Heart,
-} from "lucide-react";
+import { Search, FolderOpen, Users, FileText, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -18,21 +9,14 @@ import {
   getResourceLikeStatusAction,
 } from "@/actions/resource";
 
-export interface ResourceItem {
-  _id: string;
-  resourceTitle: string;
-  courseName: string;
-  courseCode: string;
-  departmentCode: string;
-  resourceType: string;
-  driveUrl: string;
-  likeCount: number;
-  uploadedBy?: {
-    _id?: string;
-    name?: string;
-    universityId?: string;
-  } | null;
-}
+import {
+  toggleBookmarkAction,
+  getBookmarkStatusesAction,
+} from "@/actions/bookmark";
+
+import ArchiveCard, {
+  type ResourceItem,
+} from "@/app/Components/Reusable/ArchiveCard";
 
 interface ArchiveProps {
   resources: ResourceItem[];
@@ -44,15 +28,28 @@ interface LikeState {
   likeCount: number;
 }
 
+interface BookmarkState {
+  hasBookmarked: boolean;
+  bookmarkCount: number;
+}
+
 const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
   const [likeStates, setLikeStates] = useState<Record<string, LikeState>>({});
   const [likingResources, setLikingResources] = useState<string[]>([]);
+
+  const [bookmarkStates, setBookmarkStates] = useState<
+    Record<string, BookmarkState>
+  >({});
+  const [bookmarkingResources, setBookmarkingResources] = useState<string[]>(
+    [],
+  );
+
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filters = ["All", "CSE", "BBA", "EEE", "Other"];
 
-  // Initialize like counts from the database resources
+  // Initialize like counts
   useEffect(() => {
     const initialStates: Record<string, LikeState> = {};
 
@@ -66,7 +63,7 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
     setLikeStates(initialStates);
   }, [resources]);
 
-  // Fetch the current user's like status
+  // Fetch current user's like status
   useEffect(() => {
     if (!isLoggedIn || resources.length === 0) return;
 
@@ -114,6 +111,59 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
     };
   }, [resources, isLoggedIn]);
 
+  // Initialize bookmark counts and statuses
+  useEffect(() => {
+    const initialStates: Record<string, BookmarkState> = {};
+
+    resources.forEach((resource) => {
+      initialStates[resource._id] = {
+        hasBookmarked: false,
+        bookmarkCount: 0,
+      };
+    });
+
+    setBookmarkStates(initialStates);
+  }, [resources]);
+
+  // Fetch bookmark statuses in one batch
+  useEffect(() => {
+    if (!isLoggedIn || resources.length === 0) return;
+
+    let cancelled = false;
+
+    const fetchBookmarkStatuses = async () => {
+      try {
+        const result = await getBookmarkStatusesAction(
+          resources.map((resource) => resource._id),
+          "Resource",
+        );
+
+        if (cancelled || !result.success) return;
+
+        setBookmarkStates((prev) => {
+          const updated = { ...prev };
+
+          Object.entries(result.statuses).forEach(([id, status]) => {
+            updated[id] = {
+              hasBookmarked: status.hasBookmarked,
+              bookmarkCount: status.bookmarkCount,
+            };
+          });
+
+          return updated;
+        });
+      } catch (error) {
+        console.error("Fetch bookmark statuses error:", error);
+      }
+    };
+
+    fetchBookmarkStatuses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resources, isLoggedIn]);
+
   // Handle like and unlike
   const handleLike = async (resourceId: string) => {
     if (!isLoggedIn) {
@@ -128,7 +178,6 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
     try {
       const result = await toggleResourceLikeAction(resourceId);
 
-      // TypeScript narrows the result here
       if (!result.success) {
         toast.error(result.message);
         return;
@@ -151,7 +200,43 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
     }
   };
 
-  // Calculate overview statistics from resources
+  // Handle bookmark and remove bookmark
+  const handleBookmark = async (resourceId: string) => {
+    if (!isLoggedIn) {
+      toast.error("Please login to bookmark resources.");
+      return;
+    }
+
+    if (bookmarkingResources.includes(resourceId)) return;
+
+    setBookmarkingResources((prev) => [...prev, resourceId]);
+
+    try {
+      const result = await toggleBookmarkAction(resourceId, "Resource");
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      setBookmarkStates((prev) => ({
+        ...prev,
+        [resourceId]: {
+          hasBookmarked: result.hasBookmarked ?? false,
+          bookmarkCount: result.bookmarkCount ?? 0,
+        },
+      }));
+
+      toast.success(result.message);
+    } catch (error) {
+      console.error("Toggle bookmark error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setBookmarkingResources((prev) => prev.filter((id) => id !== resourceId));
+    }
+  };
+
+  // Calculate overview statistics
   const stats = useMemo(() => {
     const contributors = new Set(
       resources
@@ -202,7 +287,7 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
         <div className="mb-10">
           <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-primary">
             <FolderOpen size={17} />
-            CAMPUSVAULT / ARCHIVES
+            MUArchive / ARCHIVES
           </div>
 
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -275,10 +360,11 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
                 key={filter}
                 type="button"
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${activeFilter === filter
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  activeFilter === filter
                     ? "bg-primary text-white"
                     : "border border-border bg-surface text-muted hover:border-primary hover:text-primary"
-                  }`}
+                }`}
               >
                 {filter}
               </button>
@@ -299,88 +385,21 @@ const Archive = ({ resources, isLoggedIn }: ArchiveProps) => {
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           {filteredResources.map((resource) => {
             const likeState = likeStates[resource._id];
-            const hasLiked = likeState?.hasLiked ?? false;
-            const likeCount = likeState?.likeCount ?? resource.likeCount ?? 0;
-            const isLiking = likingResources.includes(resource._id);
+            const bookmarkState = bookmarkStates[resource._id];
 
             return (
-              <div
+              <ArchiveCard
                 key={resource._id}
-                className="card group flex flex-col rounded-xl p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-              >
-                {/* Card Header */}
-                <div className="mb-5 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
-                    <GraduationCap size={25} />
-                  </div>
-
-                  <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
-                    {resource.departmentCode || "General"}
-                  </span>
-                </div>
-
-                {/* Resource Details */}
-                <h3 className="text-lg font-bold tracking-tight">
-                  {resource.resourceTitle}
-                </h3>
-
-                <p className="mt-1 text-xs font-medium text-primary">
-                  {resource.courseCode} · {resource.courseName}
-                </p>
-
-                <div className="mt-3">
-                  <span className="inline-flex rounded-md bg-accent-light px-2.5 py-1 text-xs font-medium text-accent">
-                    {resource.resourceType}
-                  </span>
-                </div>
-
-                {/* Uploader and Likes */}
-                <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-                  <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
-                    <Users size={15} className="shrink-0" />
-                    <span className="truncate">
-                      {resource.uploadedBy?.name || "Unknown contributor"}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleLike(resource._id)}
-                    disabled={isLiking}
-                    aria-label={hasLiked ? "Unlike resource" : "Like resource"}
-                    aria-pressed={hasLiked}
-                    title={hasLiked ? "Unlike" : "Like"}
-                    className={`flex shrink-0 items-center gap-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      hasLiked
-                        ? "text-red-500"
-                        : "text-muted hover:text-red-500"
-                    }`}
-                  >
-                    <Heart
-                      size={15}
-                      fill={hasLiked ? "currentColor" : "none"}
-                    />
-                    {likeCount}
-                  </button>
-                </div>
-
-                {/* Open Resource */}
-                {resource.driveUrl ? (
-                  <a
-                    href={resource.driveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition group-hover:border-primary group-hover:bg-primary group-hover:text-white"
-                  >
-                    View Resource
-                    <ArrowUpRight size={17} />
-                  </a>
-                ) : (
-                  <div className="mt-5 rounded-lg border border-border px-4 py-2.5 text-center text-sm text-muted">
-                    Resource link unavailable
-                  </div>
-                )}
-              </div>
+                resource={resource}
+                hasLiked={likeState?.hasLiked ?? false}
+                likeCount={likeState?.likeCount ?? resource.likeCount ?? 0}
+                isLiking={likingResources.includes(resource._id)}
+                onLike={handleLike}
+                isBookmarked={bookmarkState?.hasBookmarked ?? false}
+                bookmarkCount={bookmarkState?.bookmarkCount ?? 0}
+                isBookmarking={bookmarkingResources.includes(resource._id)}
+                onBookmark={handleBookmark}
+              />
             );
           })}
         </div>
