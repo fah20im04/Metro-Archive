@@ -126,13 +126,8 @@ export default function Register() {
             </div>
           </Link>
 
-          <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent-light px-3 py-1 text-xs font-semibold text-accent">
-            <Sparkles size={13} />
-            Student Registration Portal
-          </div>
-
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Create Your Account<span className="text-accent">.</span>
+            Create Your Account<span className="text-primary">.</span>
           </h1>
 
           <p className="mt-2 text-xs text-muted sm:text-sm">
@@ -318,7 +313,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={isPending || state?.success}
-            className="btn-primary group w-full py-3.5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
+            className="btn-primary text-white! group w-full py-3.5 text-sm disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isPending ? (
               <>

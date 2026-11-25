@@ -29,7 +29,7 @@ export default function PasswordField({
   return (
     <div>
       <label htmlFor={id} className={labelClass}>
-        {label} <span className="text-accent">*</span>
+        {label} <span className="text-primary">*</span>
       </label>
 
       <div className="relative">

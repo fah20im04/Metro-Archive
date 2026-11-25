@@ -56,7 +56,7 @@ export default function FormField({
       <label htmlFor={id} className={labelClass}>
         {label}
 
-        {required && <span className="text-accent"> *</span>}
+        {required && <span className="text-primary"> *</span>}
 
         {optional && (
           <span className="ml-1 text-muted normal-case tracking-normal">

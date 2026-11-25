@@ -46,13 +46,13 @@ export default function Login() {
         {/* Top Header & Branding */}
         <div className="flex flex-col items-center text-center">
           <Link href="/" className="group mb-4 inline-flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md transition-transform duration-300 group-hover:scale-105">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md transition-transform duration-300 group-hover:scale-105">
               <GraduationCap size={26} />
             </div>
           </Link>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome Back<span className="text-blue-600">.</span>
+            Welcome Back<span className="text-primary">.</span>
           </h1>
 
           <p className="mt-2 text-xs text-muted sm:text-sm">
@@ -189,7 +189,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isPending}
-            className="flex mx-auto items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
+            className="flex mx-auto items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-primary-hover"
           >
             {isPending ? (
               <>
