@@ -8,6 +8,7 @@ import Footer from "./Footer";
 import Features from "./Features";
 import Hero from "./Hero";
 import TopFaculties from "./home/TopFaculties";
+import TopContributors from "./home/TopContributors";
 
 const features = [
   {
@@ -54,6 +55,8 @@ export default function Home() {
       <Features />
 
       <TopFaculties />
+
+      <TopContributors />
 
       <Footer />
     </main>
