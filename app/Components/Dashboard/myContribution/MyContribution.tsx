@@ -122,17 +122,9 @@ export default function MyContribution() {
           </h1>
 
           <p className="mt-2 text-sm text-muted">
-            Manage and keep track of the study materials you've shared.
+            Manage and keep track of the study materials you&apos;ve shared.
           </p>
         </div>
-
-        <Link
-          href="/dashboard/student/upload"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold !text-white transition hover:opacity-90"
-        >
-          <Upload size={17} />
-          Upload Material
-        </Link>
       </div>
 
       {/* Statistics */}
@@ -168,12 +160,8 @@ export default function MyContribution() {
             {resources.length + papers.length}
           </h2>
           <p className="mt-1 text-xs text-muted">
-            Materials you've shared with the university community
+            Materials you&apos;ve shared with the university community
           </p>
-        </div>
-
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Upload size={22} />
         </div>
       </div>
 
@@ -321,7 +309,7 @@ function EmptyState({ type }: { type: ContributionType }) {
 
       <Link
         href="/dashboard/student/upload"
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold !text-white transition hover:opacity-90"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white! transition hover:opacity-90"
       >
         <Upload size={16} />
         Upload Material
