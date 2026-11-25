@@ -41,8 +41,8 @@ const studentLinks = [
     icon: GraduationCap,
   },
   {
-    label: "Saved Resources",
-    href: "/dashboard/bookmarks",
+    label: "Bookmarks",
+    href: "/dashboard/student/bookmarks",
     icon: Bookmark,
   },
   {
@@ -218,7 +218,7 @@ export default function DashboardSidebar({
           <div className="rounded-xl bg-primary-light p-4">
             <div className="flex items-center gap-2 text-primary">
               <ShieldCheck size={19} />
-              <span className="text-sm font-semibold">CampusVault</span>
+              <span className="text-sm font-semibold">MUArchive</span>
             </div>
 
             <p className="mt-2 text-xs leading-relaxed text-muted">

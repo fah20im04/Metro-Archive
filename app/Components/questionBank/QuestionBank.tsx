@@ -9,7 +9,14 @@ import {
   ArrowUpRight,
   BookOpen,
   GraduationCap,
+  Bookmark,
 } from "lucide-react";
+import { toast } from "sonner";
+
+import {
+  toggleBookmarkAction,
+  getBookmarkStatusesAction,
+} from "@/actions/bookmark";
 
 interface QuestionPaper {
   _id: string;
@@ -33,6 +40,11 @@ interface QuestionBankProps {
   isLoggedIn: boolean;
 }
 
+interface BookmarkState {
+  hasBookmarked: boolean;
+  bookmarkCount: number;
+}
+
 const QuestionBank = ({ isLoggedIn }: QuestionBankProps) => {
   const [questions, setQuestions] = useState<QuestionPaper[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,15 +53,18 @@ const QuestionBank = ({ isLoggedIn }: QuestionBankProps) => {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
 
+  const [bookmarkStates, setBookmarkStates] = useState<
+    Record<string, BookmarkState>
+  >({});
+
+  const [bookmarkingQuestions, setBookmarkingQuestions] = useState<string[]>(
+    [],
+  );
+
   const filters = ["All", "CSE", "BBA", "EEE", "Other"];
 
   // Fetch question papers from the API
   useEffect(() => {
-    if (!isLoggedIn) {
-      setLoading(false);
-      return;
-    }
-
     const fetchQuestionPapers = async () => {
       try {
         setLoading(true);
@@ -83,6 +98,84 @@ const QuestionBank = ({ isLoggedIn }: QuestionBankProps) => {
 
     fetchQuestionPapers();
   }, [isLoggedIn]);
+
+  // Fetch bookmark status and counts for all question papers
+  useEffect(() => {
+    if (questions.length === 0) {
+      setBookmarkStates({});
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchBookmarkStatuses = async () => {
+      try {
+        const result = await getBookmarkStatusesAction(
+          questions.map((question) => question._id),
+          "QuestionPaper",
+        );
+
+        if (cancelled || !result.success) return;
+
+        setBookmarkStates((prev) => {
+          const updated = { ...prev };
+
+          Object.entries(result.statuses).forEach(([id, status]) => {
+            updated[id] = {
+              hasBookmarked: status.hasBookmarked,
+              bookmarkCount: status.bookmarkCount,
+            };
+          });
+
+          return updated;
+        });
+      } catch (error) {
+        console.error("Fetch question bookmark statuses error:", error);
+      }
+    };
+
+    fetchBookmarkStatuses();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [questions, isLoggedIn]);
+
+  // Handle bookmark and remove bookmark
+  const handleBookmark = async (questionId: string) => {
+    if (!isLoggedIn) {
+      toast.error("Please login to bookmark question papers.");
+      return;
+    }
+
+    if (bookmarkingQuestions.includes(questionId)) return;
+
+    setBookmarkingQuestions((prev) => [...prev, questionId]);
+
+    try {
+      const result = await toggleBookmarkAction(questionId, "QuestionPaper");
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
+
+      setBookmarkStates((prev) => ({
+        ...prev,
+        [questionId]: {
+          hasBookmarked: result.hasBookmarked ?? false,
+          bookmarkCount: result.bookmarkCount ?? 0,
+        },
+      }));
+
+      toast.success(result.message);
+    } catch (error) {
+      console.error("Toggle question bookmark error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setBookmarkingQuestions((prev) => prev.filter((id) => id !== questionId));
+    }
+  };
 
   // Overview statistics
   const stats = useMemo(() => {
@@ -288,86 +381,123 @@ const QuestionBank = ({ isLoggedIn }: QuestionBankProps) => {
         {/* Question Paper Cards */}
         {!loading && !error && (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {filteredQuestions.map((question) => (
-              <div
-                key={question._id}
-                className="card group flex flex-col rounded-xl p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
-              >
-                {/* Card Header */}
-                <div className="mb-5 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
-                    <GraduationCap size={25} />
+            {filteredQuestions.map((question) => {
+              const bookmarkState = bookmarkStates[question._id];
+
+              const isBookmarked = bookmarkState?.hasBookmarked ?? false;
+
+              const bookmarkCount = bookmarkState?.bookmarkCount ?? 0;
+
+              const isBookmarking = bookmarkingQuestions.includes(question._id);
+
+              return (
+                <div
+                  key={question._id}
+                  className="card group flex flex-col rounded-xl p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+                >
+                  {/* Card Header */}
+                  <div className="mb-5 flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-light text-primary">
+                      <GraduationCap size={25} />
+                    </div>
+
+                    <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
+                      {question.departmentName || "General"}
+                    </span>
                   </div>
 
-                  <span className="rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-muted">
-                    {question.departmentName || "General"}
-                  </span>
-                </div>
+                  {/* Question Paper Details */}
+                  <h3 className="text-lg font-bold tracking-tight">
+                    {question.title}
+                  </h3>
 
-                {/* Question Paper Details */}
-                <h3 className="text-lg font-bold tracking-tight">
-                  {question.title}
-                </h3>
+                  <p className="mt-1 text-xs font-medium text-primary">
+                    {question.courseName}
+                  </p>
 
-                <p className="mt-1 text-xs font-medium text-primary">
-                  {question.courseName}
-                </p>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
-                    {question.examType}
-                  </span>
-
-                  <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
-                    Semester {question.semester}
-                  </span>
-
-                  <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
-                    Batch {question.batch}
-                  </span>
-
-                  {question.examType === "Quiz" && question.section && (
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
-                      Section {question.section}
+                      {question.examType}
                     </span>
-                  )}
-                </div>
 
-                {/* Uploader */}
-                <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
-                      <Users size={15} className="shrink-0" />
-                      <span className="truncate">
-                        {question.uploadedBy?.name || "Unknown contributor"}
+                    <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
+                      Semester {question.semester}
+                    </span>
+
+                    <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
+                      Batch {question.batch}
+                    </span>
+
+                    {question.examType === "Quiz" && question.section && (
+                      <span className="rounded-md bg-surface-secondary px-2.5 py-1 text-xs text-muted">
+                        Section {question.section}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Uploader and Bookmark */}
+                  <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+                        <Users size={15} className="shrink-0" />
+                        <span className="truncate">
+                          {question.uploadedBy?.name || "Unknown contributor"}
+                        </span>
+                      </div>
+
+                      <span className="pl-[21px] text-[11px] text-muted">
+                        {question.uploadedBy?.universityId ||
+                          "University ID unavailable"}
                       </span>
                     </div>
 
-                    <span className="pl-[21px] text-[11px] text-muted">
-                      {question.uploadedBy?.universityId ||
-                        "University ID unavailable"}
-                    </span>
+                    {/* Bookmark Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleBookmark(question._id)}
+                      disabled={isBookmarking}
+                      aria-label={
+                        isBookmarked
+                          ? "Remove bookmark"
+                          : "Bookmark question paper"
+                      }
+                      aria-pressed={isBookmarked}
+                      title={
+                        isBookmarked ? "Remove bookmark" : "Save question paper"
+                      }
+                      className={`flex shrink-0 items-center gap-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                        isBookmarked
+                          ? "text-primary"
+                          : "text-muted hover:text-primary"
+                      }`}
+                    >
+                      <Bookmark
+                        size={18}
+                        fill={isBookmarked ? "currentColor" : "none"}
+                      />
+                      <span>{bookmarkCount}</span>
+                    </button>
                   </div>
-                </div>
 
-                {/* Open Question Paper */}
-                {question.driveUrl ? (
-                  <a
-                    href={question.driveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground! no-underline! transition group-hover:border-primary group-hover:bg-primary group-hover:text-white!"
-                  >
-                    View Question Paper
-                    <ArrowUpRight size={17} />
-                  </a>
-                ) : (
-                  <div className="mt-5 rounded-lg border border-border px-4 py-2.5 text-center text-sm text-muted">
-                    Question paper link unavailable
-                  </div>
-                )}
-              </div>
-            ))}
+                  {/* Open Question Paper */}
+                  {question.driveUrl ? (
+                    <a
+                      href={question.driveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground! no-underline! transition group-hover:border-primary group-hover:bg-primary group-hover:text-white!"
+                    >
+                      View Question Paper
+                      <ArrowUpRight size={17} />
+                    </a>
+                  ) : (
+                    <div className="mt-5 rounded-lg border border-border px-4 py-2.5 text-center text-sm text-muted">
+                      Question paper link unavailable
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
