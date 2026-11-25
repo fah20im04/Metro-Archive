@@ -47,7 +47,7 @@ const studentLinks = [
   },
   {
     label: "My Contributions",
-    href: "/dashboard/contributions",
+    href: "/dashboard/student/contributions",
     icon: FileText,
   },
 ];

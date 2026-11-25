@@ -196,3 +196,57 @@ export async function createQuestionPaperAction(data: unknown) {
     };
   }
 }
+
+// GET MY QUESTION PAPERS
+// Fetch only papers uploaded by the logged-in student
+
+export async function getMyQuestionPapersAction() {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return {
+        success: false,
+        papers: [],
+        message: "Please login first.",
+      };
+    }
+
+    if (auth.user.role !== "student") {
+      return {
+        success: false,
+        papers: [],
+        message: "Only students can view their contributions.",
+      };
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(auth.user.id)) {
+      return {
+        success: false,
+        papers: [],
+        message: "Invalid user information.",
+      };
+    }
+
+    await connectDB();
+
+    const papers = await QuestionPaper.find({
+      uploadedBy: new mongoose.Types.ObjectId(auth.user.id),
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return {
+      success: true,
+      papers: JSON.parse(JSON.stringify(papers)),
+    };
+  } catch (error) {
+    console.error("Get my question papers error:", error);
+
+    return {
+      success: false,
+      papers: [],
+      message: "Failed to fetch your question papers.",
+    };
+  }
+}
