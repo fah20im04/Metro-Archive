@@ -253,7 +253,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
 
               <Link
                 href="/auth/register"
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-blue-700"
+                className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white! transition hover:bg-primary-hover"
               >
                 Get Started
                 <ArrowRight size={16} />
