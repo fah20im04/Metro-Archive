@@ -64,6 +64,7 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
       ]
       : []),
     { label: "Faculty", href: "/faculty" },
+    { label: "About Us", href: "/about-us" },
   ];
 
   // A link is active on its own route and on any nested route
