@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { GraduationCap, UserRound, FileQuestion, Library } from "lucide-react";
 
 import { getCurrentUserAction } from "@/actions/auth";
+import { getAdminStudentReportsAction } from "@/actions/admin";
+
+import StudentReports from "@/app/Components/Dashboard/admin/reports/StudentReports";
 
 const tabs = [
     { value: "student", label: "Student", icon: GraduationCap },
@@ -14,7 +17,11 @@ const tabs = [
 type ReportTab = (typeof tabs)[number]["value"];
 
 interface AdminReportsPageProps {
-    searchParams: Promise<{ tab?: string }>;
+    searchParams: Promise<{
+        tab?: string;
+        department?: string;
+        batch?: string;
+    }>;
 }
 
 function isReportTab(value: string | undefined): value is ReportTab {
@@ -34,8 +41,13 @@ export default async function AdminReportsPage({
         redirect("/dashboard");
     }
 
-    const { tab } = await searchParams;
+    const { tab, department = "", batch = "" } = await searchParams;
     const activeTab: ReportTab = isReportTab(tab) ? tab : "student";
+
+    const studentReports =
+        activeTab === "student"
+            ? await getAdminStudentReportsAction({ department, batch })
+            : null;
 
     return (
         <div className="space-y-6">
@@ -67,8 +79,8 @@ export default async function AdminReportsPage({
                             scroll={false}
                             aria-current={isActive ? "page" : undefined}
                             className={`-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium no-underline! transition ${isActive
-                                    ? "border-primary text-primary!"
-                                    : "border-transparent text-muted! hover:border-border hover:text-foreground!"
+                                ? "border-primary text-primary!"
+                                : "border-transparent text-muted! hover:border-border hover:text-foreground!"
                                 }`}
                         >
                             <Icon size={16} />
@@ -80,9 +92,20 @@ export default async function AdminReportsPage({
 
             {/* Active tab content (only the selected tab is rendered) */}
             <section>
-                {activeTab === "student" && (
-                    <div>{/* <StudentReports /> */}</div>
-                )}
+                {activeTab === "student" &&
+                    (studentReports?.success ? (
+                        <StudentReports
+                            data={studentReports.data}
+                            filters={{
+                                department: department.trim().toUpperCase(),
+                                batch: batch.trim(),
+                            }}
+                        />
+                    ) : (
+                        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-500">
+                            {studentReports?.message || "Failed to load student reports."}
+                        </div>
+                    ))}
 
                 {activeTab === "faculty" && (
                     <div>{/* <FacultyReports /> */}</div>
