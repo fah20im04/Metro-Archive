@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import QuestionBank from "@/app/Components/Dashboard/questionBank/QuestionBank";
-import { getQuestionPapersAction } from "@/actions/questionPaper";
+import { getMyQuestionPapersAction } from "@/actions/questionPaper";
 
 function QuestionBankLoading() {
   return (
@@ -25,7 +25,7 @@ function QuestionBankLoading() {
 }
 
 async function QuestionBankContent() {
-  const result = await getQuestionPapersAction();
+  const result = await getMyQuestionPapersAction();
 
   return <QuestionBank questions={result.papers ?? []} />;
 }
