@@ -3,9 +3,13 @@ import { redirect } from "next/navigation";
 import { GraduationCap, UserRound, FileQuestion, Library } from "lucide-react";
 
 import { getCurrentUserAction } from "@/actions/auth";
-import { getAdminStudentReportsAction } from "@/actions/admin";
+import {
+    getAdminFacultyReportsAction,
+    getAdminStudentReportsAction,
+} from "@/actions/admin";
 
 import StudentReports from "@/app/Components/Dashboard/admin/reports/StudentReports";
+import FacultyReports from "@/app/Components/Dashboard/admin/reports/FacultyReports";
 
 const tabs = [
     { value: "student", label: "Student", icon: GraduationCap },
@@ -21,6 +25,7 @@ interface AdminReportsPageProps {
         tab?: string;
         department?: string;
         batch?: string;
+        designation?: string;
     }>;
 }
 
@@ -41,12 +46,18 @@ export default async function AdminReportsPage({
         redirect("/dashboard");
     }
 
-    const { tab, department = "", batch = "" } = await searchParams;
+    const { tab, department = "", batch = "", designation = "" } =
+        await searchParams;
     const activeTab: ReportTab = isReportTab(tab) ? tab : "student";
 
     const studentReports =
         activeTab === "student"
             ? await getAdminStudentReportsAction({ department, batch })
+            : null;
+
+    const facultyReports =
+        activeTab === "faculty"
+            ? await getAdminFacultyReportsAction({ department, designation })
             : null;
 
     return (
@@ -79,8 +90,8 @@ export default async function AdminReportsPage({
                             scroll={false}
                             aria-current={isActive ? "page" : undefined}
                             className={`-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium no-underline! transition ${isActive
-                                ? "border-primary text-primary!"
-                                : "border-transparent text-muted! hover:border-border hover:text-foreground!"
+                                    ? "border-primary text-primary!"
+                                    : "border-transparent text-muted! hover:border-border hover:text-foreground!"
                                 }`}
                         >
                             <Icon size={16} />
@@ -107,9 +118,20 @@ export default async function AdminReportsPage({
                         </div>
                     ))}
 
-                {activeTab === "faculty" && (
-                    <div>{/* <FacultyReports /> */}</div>
-                )}
+                {activeTab === "faculty" &&
+                    (facultyReports?.success ? (
+                        <FacultyReports
+                            data={facultyReports.data}
+                            filters={{
+                                department: department.trim(),
+                                designation: designation.trim(),
+                            }}
+                        />
+                    ) : (
+                        <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-500">
+                            {facultyReports?.message || "Failed to load faculty reports."}
+                        </div>
+                    ))}
 
                 {activeTab === "question-bank" && (
                     <div>{/* <QuestionBankReports /> */}</div>

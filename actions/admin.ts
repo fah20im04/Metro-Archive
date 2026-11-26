@@ -575,3 +575,115 @@ export async function getAdminStudentReportsAction(filters?: {
   }
 }
 
+// Faculty reports (charts) for admin
+export async function getAdminFacultyReportsAction(filters?: {
+  department?: string;
+  designation?: string;
+}) {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return { success: false as const, message: "Please login first." };
+    }
+
+    if (auth.user.role !== "admin") {
+      return { success: false as const, message: "Unauthorized access." };
+    }
+
+    await connectDB();
+
+    const department = filters?.department?.trim() || "";
+    const designation = filters?.designation?.trim() || "";
+
+    const match: Record<string, unknown> = {};
+
+    if (department) match.departmentNames = department;
+    if (designation) match.designation = designation;
+
+    const [
+      byDepartmentRaw,
+      byDesignationRaw,
+      topUpvotedRaw,
+      totalsRaw,
+      reviewStatusRaw,
+      departmentOptions,
+      designationOptions,
+    ] = await Promise.all([
+      Faculty.aggregate([
+        { $match: match },
+        { $unwind: "$departmentNames" },
+        ...(department ? [{ $match: { departmentNames: department } }] : []),
+        { $group: { _id: "$departmentNames", count: { $sum: 1 } } },
+        { $sort: { count: -1, _id: 1 } },
+      ]),
+      Faculty.aggregate([
+        { $match: match },
+        { $group: { _id: "$designation", count: { $sum: 1 } } },
+        { $sort: { count: -1, _id: 1 } },
+      ]),
+      Faculty.find({ ...match, upvoteCount: { $gt: 0 } })
+        .sort({ upvoteCount: -1, name: 1 })
+        .limit(10)
+        .select("name upvoteCount")
+        .lean(),
+      Faculty.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: null,
+            totalFaculty: { $sum: 1 },
+            totalUpvotes: { $sum: "$upvoteCount" },
+          },
+        },
+      ]),
+      FacultyReview.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+      Faculty.distinct("departmentNames"),
+      Faculty.distinct("designation"),
+    ]);
+
+    const statusCount = (status: string) =>
+      (reviewStatusRaw.find((item) => item._id === status)?.count as
+        | number
+        | undefined) ?? 0;
+
+    return {
+      success: true as const,
+      data: {
+        totalFaculty: (totalsRaw[0]?.totalFaculty as number | undefined) ?? 0,
+        totalUpvotes: (totalsRaw[0]?.totalUpvotes as number | undefined) ?? 0,
+        pendingReviews: statusCount("pending"),
+        byDepartment: byDepartmentRaw.map((item) => ({
+          department: String(item._id),
+          count: item.count as number,
+        })),
+        byDesignation: byDesignationRaw.map((item) => ({
+          designation: String(item._id),
+          count: item.count as number,
+        })),
+        topUpvoted: topUpvotedRaw.map((item) => ({
+          name: String(item.name),
+          upvotes: Number(item.upvoteCount),
+        })),
+        reviewsByStatus: [
+          { status: "approved", count: statusCount("approved") },
+          { status: "pending", count: statusCount("pending") },
+          { status: "rejected", count: statusCount("rejected") },
+        ],
+        filterOptions: {
+          departments: (departmentOptions as string[]).filter(Boolean).sort(),
+          designations: (designationOptions as string[]).filter(Boolean).sort(),
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Admin faculty reports error:", error);
+
+    return {
+      success: false as const,
+      message: "Failed to load faculty reports.",
+    };
+  }
+}
