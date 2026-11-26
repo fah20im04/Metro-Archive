@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Check,
   X,
-  Clock,
   MessageSquare,
-  GraduationCap,
-  User,
-  Loader2,
+  Search,
+  RotateCcw,
+  RefreshCw,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { updateFacultyReviewStatusAction } from "@/actions/facultyReview";
@@ -47,15 +49,15 @@ const filters = [
   { label: "Rejected", value: "rejected" },
 ] as const;
 
+const PAGE_SIZE = 10;
+
 export default function FacultyReviewManagement({ initialReviews }: Props) {
   const [reviews, setReviews] = useState(initialReviews);
   const [activeFilter, setActiveFilter] = useState<"all" | ReviewStatus>("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-
-  const filteredReviews =
-    activeFilter === "all"
-      ? reviews
-      : reviews.filter((review) => review.status === activeFilter);
 
   const counts = {
     all: reviews.length,
@@ -63,6 +65,44 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
     approved: reviews.filter((review) => review.status === "approved").length,
     rejected: reviews.filter((review) => review.status === "rejected").length,
   };
+
+  const filteredReviews = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    return reviews.filter((review) => {
+      if (activeFilter !== "all" && review.status !== activeFilter) {
+        return false;
+      }
+
+      if (!query) return true;
+
+      return [
+        review.title,
+        review.description,
+        review.facultyId?.name,
+        review.userId?.name,
+        review.userId?.universityId,
+      ]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(query));
+    });
+  }, [reviews, activeFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredReviews.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const pagedReviews = filteredReviews.slice(
+    startIndex,
+    startIndex + PAGE_SIZE,
+  );
+
+  const hasFilters = search.trim() !== "" || activeFilter !== "all";
+
+  function resetFilters() {
+    setSearch("");
+    setActiveFilter("all");
+    setPage(1);
+  }
 
   async function handleStatusChange(reviewId: string, status: ReviewStatus) {
     setUpdatingId(reviewId);
@@ -95,12 +135,20 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
   function getStatusStyle(status: ReviewStatus) {
     switch (status) {
       case "approved":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
+        return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600";
       case "rejected":
-        return "bg-red-500/10 text-red-600 border-red-500/20";
+        return "border-red-500/20 bg-red-500/10 text-red-600";
       default:
-        return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+        return "border-amber-500/20 bg-amber-500/10 text-amber-600";
     }
+  }
+
+  function formatDate(date: string) {
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   }
 
   return (
@@ -119,16 +167,19 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
       </div>
 
       {/* Review Statistics */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {filters.map((filter) => (
           <button
             key={filter.value}
-            onClick={() => setActiveFilter(filter.value)}
-            className={`card rounded-xl border p-4 text-left transition ${
-              activeFilter === filter.value
+            type="button"
+            onClick={() => {
+              setActiveFilter(filter.value);
+              setPage(1);
+            }}
+            className={`rounded-xl border p-4 text-left transition ${activeFilter === filter.value
                 ? "border-primary bg-primary/5"
-                : "hover:border-primary/40"
-            }`}
+                : "border-border bg-surface hover:border-primary/40"
+              }`}
           >
             <p className="text-xs text-muted">{filter.label}</p>
 
@@ -137,170 +188,280 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
         ))}
       </div>
 
-      {/* Reviews */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold">
-            {activeFilter === "all"
-              ? "All Reviews"
-              : `${activeFilter.charAt(0).toUpperCase()}${activeFilter.slice(1)} Reviews`}
-          </h2>
+      {/* Reviews Table */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+        {/* Table Header */}
+        <div className="border-b border-border p-5 sm:p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                {activeFilter === "all"
+                  ? "All Reviews"
+                  : `${activeFilter.charAt(0).toUpperCase()}${activeFilter.slice(1)} Reviews`}
+              </h2>
 
-          <span className="text-xs text-muted">
-            {filteredReviews.length} results
-          </span>
+              <p className="mt-1 text-sm text-muted">
+                Search and moderate submitted reviews.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={resetFilters}
+              disabled={!hasFilters}
+              className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-border px-3 py-2 text-sm font-medium text-muted transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-40 sm:self-auto"
+            >
+              <RefreshCw size={15} />
+              Reset filters
+            </button>
+          </div>
+
+          <div className="relative mt-5">
+            <Search
+              size={17}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+            />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search title, faculty, student or ID..."
+              className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
+            />
+          </div>
         </div>
 
-        {filteredReviews.length === 0 ? (
-          <div className="card rounded-xl border p-10 text-center">
-            <MessageSquare className="mx-auto h-8 w-8 text-muted" />
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1000px] text-left">
+            <thead className="bg-background/70">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider text-muted">
+                <th className="px-6 py-4">Review</th>
+                <th className="px-6 py-4">Faculty</th>
+                <th className="px-6 py-4">Submitted By</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Submitted</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
 
-            <h3 className="mt-3 font-semibold">No reviews found</h3>
+            <tbody className="divide-y divide-border">
+              {pagedReviews.length > 0 ? (
+                pagedReviews.map((review) => {
+                  const isUpdating = updatingId === review._id;
+                  const isExpanded = expandedId === review._id;
+                  const isLong = review.description.length > 90;
 
-            <p className="mt-1 text-sm text-muted">
-              There are no reviews in this category.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredReviews.map((review) => {
-              const isUpdating = updatingId === review._id;
-
-              return (
-                <article
-                  key={review._id}
-                  className="card space-y-4 rounded-xl border p-5"
-                >
-                  {/* Review Header */}
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <h3 className="font-semibold">{review.title}</h3>
-
-                      <p className="mt-1 text-xs text-muted">
-                        Submitted{" "}
-                        {new Date(review.createdAt).toLocaleDateString(
-                          "en-GB",
-                          {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          },
-                        )}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`w-fit rounded-full border px-3 py-1 text-xs font-medium capitalize ${getStatusStyle(
-                        review.status,
-                      )}`}
+                  return (
+                    <tr
+                      key={review._id}
+                      className="align-top transition-colors hover:bg-background/60"
                     >
-                      {review.status}
-                    </span>
-                  </div>
+                      {/* Review */}
+                      <td className="max-w-[320px] px-6 py-4">
+                        <p className="text-sm font-semibold text-foreground">
+                          {review.title}
+                        </p>
 
-                  {/* Review Description */}
-                  <p className="whitespace-pre-wrap text-sm leading-6 text-muted">
-                    {review.description}
-                  </p>
+                        <p
+                          className={`mt-1 whitespace-pre-wrap text-xs leading-5 text-muted ${isExpanded ? "" : "line-clamp-2"
+                            }`}
+                        >
+                          {review.description}
+                        </p>
 
-                  {/* Student and Faculty Details */}
-                  <div className="grid gap-3 rounded-lg bg-muted/10 p-3 sm:grid-cols-2">
-                    <div className="flex items-start gap-2">
-                      <GraduationCap className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        {isLong && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedId(isExpanded ? null : review._id)
+                            }
+                            className="mt-1 text-xs font-semibold text-primary"
+                          >
+                            {isExpanded ? "Show less" : "Read more"}
+                          </button>
+                        )}
+                      </td>
 
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted">Faculty Member</p>
-
-                        <p className="truncate text-sm font-medium">
+                      {/* Faculty */}
+                      <td className="px-6 py-4">
+                        <p className="max-w-[180px] truncate text-sm font-medium text-foreground">
                           {review.facultyId?.name || "Faculty unavailable"}
                         </p>
 
                         {review.facultyId?.designation && (
-                          <p className="text-xs text-muted">
+                          <p className="mt-1 max-w-[180px] truncate text-xs text-muted">
                             {review.facultyId.designation}
                           </p>
                         )}
-                      </div>
-                    </div>
+                      </td>
 
-                    <div className="flex items-start gap-2">
-                      <User className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted">Submitted By</p>
-
-                        <p className="truncate text-sm font-medium">
+                      {/* Submitted By */}
+                      <td className="px-6 py-4">
+                        <p className="max-w-[180px] truncate text-sm font-medium text-foreground">
                           {review.userId?.name || "Student unavailable"}
                         </p>
 
-                        <p className="text-xs text-muted">
+                        <p className="mt-1 text-xs text-muted">
                           {review.userId?.universityId || "No university ID"}
                         </p>
-                      </div>
-                    </div>
-                  </div>
+                      </td>
 
-                  {/* Moderation Actions */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-                    <div className="flex items-center gap-2 text-xs text-muted">
-                      <Clock className="h-3.5 w-3.5" />
-                      Review moderation
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {review.status !== "approved" && (
-                        <button
-                          disabled={isUpdating}
-                          onClick={() =>
-                            handleStatusChange(review._id, "approved")
-                          }
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium capitalize ${getStatusStyle(
+                            review.status,
+                          )}`}
                         >
-                          {isUpdating ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Check className="h-3.5 w-3.5" />
+                          <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-current" />
+                          {review.status}
+                        </span>
+                      </td>
+
+                      {/* Submitted */}
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted">
+                          <CalendarDays size={14} />
+                          {formatDate(review.createdAt)}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          {isUpdating && (
+                            <RefreshCw
+                              size={15}
+                              className="animate-spin text-primary"
+                            />
                           )}
-                          Approve
-                        </button>
-                      )}
 
-                      {review.status !== "rejected" && (
-                        <button
-                          disabled={isUpdating}
-                          onClick={() =>
-                            handleStatusChange(review._id, "rejected")
-                          }
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-500/10 disabled:opacity-50"
-                        >
-                          {isUpdating ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <X className="h-3.5 w-3.5" />
+                          {review.status !== "approved" && (
+                            <button
+                              type="button"
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleStatusChange(review._id, "approved")
+                              }
+                              title="Approve review"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-500/20 text-emerald-600 transition hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <Check size={16} />
+                            </button>
                           )}
-                          Reject
-                        </button>
-                      )}
 
-                      {review.status !== "pending" && (
-                        <button
-                          disabled={isUpdating}
-                          onClick={() =>
-                            handleStatusChange(review._id, "pending")
-                          }
-                          className="rounded-lg border px-3 py-2 text-xs font-medium transition hover:bg-muted disabled:opacity-50"
-                        >
-                          Reset to Pending
-                        </button>
-                      )}
+                          {review.status !== "rejected" && (
+                            <button
+                              type="button"
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleStatusChange(review._id, "rejected")
+                              }
+                              title="Reject review"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/20 text-red-500 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+
+                          {review.status !== "pending" && (
+                            <button
+                              type="button"
+                              disabled={isUpdating}
+                              onClick={() =>
+                                handleStatusChange(review._id, "pending")
+                              }
+                              title="Reset to pending"
+                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              <RotateCcw size={15} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-16 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-background text-muted">
+                      <MessageSquare size={23} />
                     </div>
-                  </div>
-                </article>
-              );
-            })}
+
+                    <h3 className="mt-3 font-semibold text-foreground">
+                      No reviews found
+                    </h3>
+
+                    <p className="mt-1 text-sm text-muted">
+                      There are no reviews matching your filters.
+                    </p>
+
+                    {hasFilters && (
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
+                      >
+                        <X size={14} />
+                        Clear filters
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex flex-col gap-4 border-t border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="text-sm text-muted">
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {filteredReviews.length === 0 ? 0 : startIndex + 1}
+              {" - "}
+              {Math.min(startIndex + PAGE_SIZE, filteredReviews.length)}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-foreground">
+              {filteredReviews.length}
+            </span>{" "}
+            reviews
+          </p>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage(currentPage - 1)}
+              disabled={currentPage <= 1}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={17} />
+            </button>
+
+            <span className="min-w-20 text-center text-sm font-medium text-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setPage(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted transition hover:bg-background disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Next page"
+            >
+              <ChevronRight size={17} />
+            </button>
           </div>
-        )}
-      </section>
+        </div>
+      </div>
     </div>
   );
 }
