@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  Bookmark,
   BookOpen,
   FileQuestion,
   Search,
@@ -383,7 +382,7 @@ function EmptyState({ type }: { type: BookmarkType }) {
 
       <Link
         href={isNotes ? "/archives" : "/question-bank"}
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold !text-white transition hover:opacity-90"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white! transition hover:opacity-90"
       >
         {isNotes ? "Explore Archives" : "Explore Question Bank"}
       </Link>

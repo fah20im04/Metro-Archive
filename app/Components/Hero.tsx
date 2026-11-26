@@ -37,31 +37,6 @@ export default function Hero() {
           insights — curated by students, for students.
         </p>
 
-        {/* Glassmorphic Spotlight Search Bar */}
-        <form
-          action="/search"
-          method="GET"
-          className="mt-9 flex w-full max-w-xl items-center gap-2 rounded-2xl border border-border/80 bg-surface/75 p-2 shadow-xl shadow-black/5 backdrop-blur-xl transition-all focus-within:border-primary/50 focus-within:bg-surface/95"
-        >
-          <Search className="ml-3 shrink-0 text-muted-foreground" size={20} />
-
-          <input
-            type="search"
-            name="q"
-            placeholder="Search courses, notes, or past papers..."
-            aria-label="Search academic resources"
-            className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-
-          <button
-            type="submit"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-hover"
-          >
-            <span>Search</span>
-            <ArrowRight size={16} />
-          </button>
-        </form>
-
         {/* Lightweight Glass Dock for Core Sections */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link

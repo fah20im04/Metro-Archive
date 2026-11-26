@@ -204,19 +204,25 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
                   />
 
                   <div className="absolute right-0 top-12 z-50 w-64 rounded-xl border border-border bg-background p-4 shadow-lg">
-                    <div className="flex items-center gap-3">
-                      <UserCircle size={32} className="shrink-0 text-primary" />
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setProfileOpen(false)}
+                      className="block rounded-lg no-underline! transition hover:bg-surface-secondary"
+                    >
+                      <div className="flex items-center gap-3 p-1">
+                        <UserCircle size={32} className="shrink-0 text-primary" />
 
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-foreground">
-                          {currentUser.name}
-                        </p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {currentUser.name}
+                          </p>
 
-                        <p className="truncate text-xs text-muted">
-                          {currentUser.universityId}
-                        </p>
+                          <p className="truncate text-xs text-muted">
+                            {currentUser.universityId}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
 
                     <div className="my-3 border-t border-border" />
 
@@ -302,19 +308,23 @@ export default function NavbarClient({ currentUser }: NavbarClientProps) {
               {currentUser ? (
                 <>
                   {/* Mobile User Information */}
-                  <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
-                    <UserCircle size={28} className="shrink-0 text-primary" />
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={closeMenus}
+                    className="block no-underline!"
+                  >
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3">
+                      <UserCircle size={28} className="shrink-0 text-primary" />
 
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {currentUser.name}
-                      </p>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {currentUser.name}
+                        </p>
 
-                      <p className="text-xs text-muted">
-                        {currentUser.universityId}
-                      </p>
+                        <p className="text-xs text-muted">{currentUser.universityId}</p>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
 
                   <Link
                     href={dashboard}

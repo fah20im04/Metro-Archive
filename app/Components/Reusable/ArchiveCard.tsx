@@ -124,7 +124,7 @@ export default function ArchiveCard({
           href={resource.driveUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition group-hover:border-primary group-hover:bg-primary group-hover:text-white"
+          className="mt-5 flex w-full items-center justify-between rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground! no-underline! transition hover:border-primary hover:bg-primary hover:text-white!"
         >
           View Note
           <ArrowUpRight size={17} />

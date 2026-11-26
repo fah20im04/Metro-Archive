@@ -5,11 +5,9 @@ import {
   BookOpen,
   FileQuestion,
   Search,
-  Upload,
   FolderOpen,
   GraduationCap,
 } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
 import { getMyResourcesAction } from "@/actions/resource";
@@ -122,17 +120,9 @@ export default function MyContribution() {
           </h1>
 
           <p className="mt-2 text-sm text-muted">
-            Manage and keep track of the study materials you've shared.
+            Manage and keep track of the study materials you&apos;ve shared.
           </p>
         </div>
-
-        <Link
-          href="/dashboard/student/upload"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold !text-white transition hover:opacity-90"
-        >
-          <Upload size={17} />
-          Upload Material
-        </Link>
       </div>
 
       {/* Statistics */}
@@ -168,12 +158,8 @@ export default function MyContribution() {
             {resources.length + papers.length}
           </h2>
           <p className="mt-1 text-xs text-muted">
-            Materials you've shared with the university community
+            Materials you&apos;ve shared with the university community
           </p>
-        </div>
-
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Upload size={22} />
         </div>
       </div>
 
@@ -318,14 +304,6 @@ function EmptyState({ type }: { type: ContributionType }) {
           ? "You haven't shared any notes yet. Upload your study materials to help other students."
           : "You haven't shared any question papers yet. Contribute papers to help your university community."}
       </p>
-
-      <Link
-        href="/dashboard/student/upload"
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold !text-white transition hover:opacity-90"
-      >
-        <Upload size={16} />
-        Upload Material
-      </Link>
     </div>
   );
 }

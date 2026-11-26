@@ -1,20 +1,14 @@
-import Link from "next/link";
 import {
-  ArrowRight,
   BookOpen,
   FileText,
-  GraduationCap,
-  Search,
   Star,
-  Users,
-  ShieldCheck,
   LibraryBig,
-  Menu,
 } from "lucide-react";
-import Navbar from "./Navbar";
 import Footer from "./Footer";
 import Features from "./Features";
 import Hero from "./Hero";
+import TopFaculties from "./home/TopFaculties";
+import TopContributors from "./home/TopContributors";
 
 const features = [
   {
@@ -59,6 +53,10 @@ export default function Home() {
       <Hero />
 
       <Features />
+
+      <TopFaculties />
+
+      <TopContributors />
 
       <Footer />
     </main>
