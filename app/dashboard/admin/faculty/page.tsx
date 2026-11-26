@@ -4,6 +4,7 @@ import { getCurrentUserAction } from "@/actions/auth";
 import { getAdminFacultyOverviewAction } from "@/actions/admin";
 
 import FacultyKpiCards from "@/app/Components/Dashboard/admin/faculty/FacultyKpiCards";
+import AddFacultyModal from "@/app/Components/Dashboard/admin/faculty/AddFacultyModal";
 
 export default async function AdminFacultyPage() {
     const auth = await getCurrentUserAction();
@@ -43,6 +44,7 @@ export default async function AdminFacultyPage() {
             )}
 
             {/* More faculty management components go here */}
+            <AddFacultyModal />
         </div>
     );
 }
