@@ -687,3 +687,56 @@ export async function getAdminFacultyReportsAction(filters?: {
     };
   }
 }
+// Faculty management overview (KPIs) 
+export async function getAdminFacultyOverviewAction() {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return { success: false as const, message: "Please login first." };
+    }
+
+    if (auth.user.role !== "admin") {
+      return { success: false as const, message: "Unauthorized access." };
+    }
+
+    await connectDB();
+
+    const [
+      totalFaculty,
+      activeFaculty,
+      inactiveFaculty,
+      upvotesRaw,
+      pendingReviews,
+      totalReviews,
+    ] = await Promise.all([
+      Faculty.countDocuments({}),
+      Faculty.countDocuments({ profileStatus: "active" }),
+      Faculty.countDocuments({ profileStatus: "inactive" }),
+      Faculty.aggregate([
+        { $group: { _id: null, total: { $sum: "$upvoteCount" } } },
+      ]),
+      FacultyReview.countDocuments({ status: "pending" }),
+      FacultyReview.countDocuments({}),
+    ]);
+
+    return {
+      success: true as const,
+      stats: {
+        totalFaculty,
+        activeFaculty,
+        inactiveFaculty,
+        totalUpvotes: (upvotesRaw[0]?.total as number | undefined) ?? 0,
+        pendingReviews,
+        totalReviews,
+      },
+    };
+  } catch (error) {
+    console.error("Admin faculty overview error:", error);
+
+    return {
+      success: false as const,
+      message: "Failed to load faculty overview.",
+    };
+  }
+}
