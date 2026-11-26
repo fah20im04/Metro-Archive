@@ -17,7 +17,7 @@ export const createFacultyReviewSchema = z.object({
 
 export const updateFacultyReviewStatusSchema = z.object({
   reviewId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid review ID."),
-  status: z.enum(["approved", "rejected"]),
+  status: z.enum(["pending", "approved", "rejected"]),
 });
 
 export type CreateFacultyReviewInput = z.infer<
