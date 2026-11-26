@@ -450,3 +450,62 @@ export async function deleteFacultyAction(id: string) {
   }
 }
 
+// Get top 3 faculty members by upvotes
+export async function getTopFacultiesAction() {
+  try {
+    await connectDB();
+
+    const faculties = await Faculty.find({ profileStatus: "active" })
+    .select("name designation departmentIds departmentNames upvoteCount profileImage")
+    .sort({ upvoteCount: -1, name: 1 })
+    .limit(3)
+    .lean();
+
+    const departmentMap: Record<number, string> = {
+      114: "English",
+      111: "Economic",
+      116: "BBA",
+      113: "L&J",
+      134: "SE",
+      141: "EEE",
+    };
+
+    const result = faculties.map((faculty) => {
+      const departmentNames = (
+        faculty as typeof faculty & {
+          departmentNames?: string[];
+        }
+      ).departmentNames;
+
+      const department =
+        departmentNames?.[0] ||
+        faculty.departmentIds
+          ?.map((id) => departmentMap[Number(id)] || "")
+          .filter(Boolean)[0] ||
+        "University Faculty";
+
+      return {
+        id: faculty._id.toString(),
+        name: faculty.name,
+        designation: faculty.designation || "Faculty Member",
+        department,
+        upvoteCount: faculty.upvoteCount || 0,
+        profileImage: faculty.profileImage || "",
+      };
+    });
+
+    return {
+      success: true,
+      faculties: JSON.parse(JSON.stringify(result)),
+    };
+  } catch (error) {
+    console.error("Get top faculties error:", error);
+
+    return {
+      success: false,
+      faculties: [],
+      message: "Failed to fetch top faculty members.",
+    };
+  }
+}
+
