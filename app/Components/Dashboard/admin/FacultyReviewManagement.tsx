@@ -237,7 +237,7 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px] text-left">
+          <table className="w-full min-w-250 text-left">
             <thead className="bg-background/70">
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider text-muted">
                 <th className="px-6 py-4">Review</th>
@@ -289,12 +289,12 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
 
                       {/* Faculty */}
                       <td className="px-6 py-4">
-                        <p className="max-w-[180px] truncate text-sm font-medium text-foreground">
+                        <p className="max-w-45 truncate text-sm font-medium text-foreground">
                           {review.facultyId?.name || "Faculty unavailable"}
                         </p>
 
                         {review.facultyId?.designation && (
-                          <p className="mt-1 max-w-[180px] truncate text-xs text-muted">
+                          <p className="mt-1 max-w-45 truncate text-xs text-muted">
                             {review.facultyId.designation}
                           </p>
                         )}
@@ -302,7 +302,7 @@ export default function FacultyReviewManagement({ initialReviews }: Props) {
 
                       {/* Submitted By */}
                       <td className="px-6 py-4">
-                        <p className="max-w-[180px] truncate text-sm font-medium text-foreground">
+                        <p className="max-w-45 truncate text-sm font-medium text-foreground">
                           {review.userId?.name || "Student unavailable"}
                         </p>
 
