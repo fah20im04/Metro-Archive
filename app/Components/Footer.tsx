@@ -1,5 +1,3 @@
-"use client";
-
 import { GraduationCap } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -11,15 +9,13 @@ const Footer = () => {
         <Link href="/" className="flex items-center gap-2">
           <GraduationCap className="text-primary" size={22} />
           <span className="font-bold">
-            Campus<span className="text-primary">Vault</span>
+            MU<span className="text-primary">Archive</span>
           </span>
         </Link>
         <p className="text-center text-sm text-muted">
           A better way to share knowledge and learn together.
         </p>
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} CampusVault
-        </p>
+        <p className="text-sm text-muted-foreground">© MUArchive</p>
       </div>
     </footer>
   );
