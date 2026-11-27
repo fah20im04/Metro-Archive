@@ -1,6 +1,6 @@
 
 import {
-  createResourceAction,
+  createNoteAction,
   getResourcesAction,
 } from "@/actions/resource";
 
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = await createResourceAction(body);
+    const result = await createNoteAction(body);
 
     return NextResponse.json(result);
   } catch {
