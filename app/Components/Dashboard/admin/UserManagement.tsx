@@ -110,7 +110,7 @@ export default function UserManagement({
         department,
       });
 
-      if (!result.success) {
+      if (!result.success || !result.pagination) {
         setError(result.message || "Failed to load users.");
         return;
       }
