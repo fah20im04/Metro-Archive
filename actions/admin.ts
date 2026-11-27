@@ -336,7 +336,6 @@ export async function updateAdminUserAction(
   }
 }
 
-
 export async function updateAdminUserStatusAction(
   userId: string,
   status: "active" | "suspended"
@@ -424,3 +423,320 @@ export async function updateAdminUserStatusAction(
   }
 }
 
+// Student reports (charts) for admin
+export async function getAdminStudentReportsAction(filters?: {
+  department?: string;
+  batch?: string;
+}) {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return { success: false as const, message: "Please login first." };
+    }
+
+    if (auth.user.role !== "admin") {
+      return { success: false as const, message: "Unauthorized access." };
+    }
+
+    await connectDB();
+
+    const department = filters?.department?.trim().toUpperCase() || "";
+    const batch = filters?.batch?.trim() || "";
+
+    const match: Record<string, unknown> = { role: "student" };
+
+    if (department) match.departmentName = department;
+    if (batch) match.batch = batch;
+
+    // Last 12 months, including the current one (UTC)
+    const now = new Date();
+    const monthKeys: string[] = [];
+
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+      monthKeys.push(
+        `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+      );
+    }
+
+    const rangeStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
+    );
+
+    const [byDepartmentRaw, registrationsRaw, matrixRaw, departmentOptions, batchOptions] =
+      await Promise.all([
+        User.aggregate([
+          { $match: match },
+          {
+            $group: {
+              _id: { $ifNull: ["$departmentName", "Unassigned"] },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { count: -1, _id: 1 } },
+        ]),
+        User.aggregate([
+          { $match: { ...match, createdAt: { $gte: rangeStart } } },
+          {
+            $group: {
+              _id: {
+                $dateToString: { format: "%Y-%m", date: "$createdAt" },
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        User.aggregate([
+          { $match: match },
+          {
+            $group: {
+              _id: {
+                department: { $ifNull: ["$departmentName", "Unassigned"] },
+                batch: { $ifNull: ["$batch", "N/A"] },
+              },
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        User.distinct("departmentName", { role: "student" }),
+        User.distinct("batch", { role: "student" }),
+      ]);
+
+    const byDepartment = byDepartmentRaw.map((item) => ({
+      department: String(item._id),
+      count: item.count as number,
+    }));
+
+    const monthLabel = (key: string) => {
+      const [year, month] = key.split("-").map(Number);
+
+      return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString(
+        "en-GB",
+        { month: "short", year: "2-digit", timeZone: "UTC" },
+      );
+    };
+
+    const registrationMap = new Map<string, number>(
+      registrationsRaw.map((item) => [String(item._id), item.count as number]),
+    );
+
+    const registrations = monthKeys.map((key) => ({
+      month: monthLabel(key),
+      count: registrationMap.get(key) ?? 0,
+    }));
+
+    // Department x batch matrix for the stacked bar chart
+    const batches = Array.from(
+      new Set(matrixRaw.map((item) => String(item._id.batch))),
+    ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    const rowMap = new Map<string, Record<string, string | number>>();
+
+    for (const item of matrixRaw) {
+      const dept = String(item._id.department);
+      const row = rowMap.get(dept) ?? { department: dept };
+
+      row[String(item._id.batch)] = item.count as number;
+      rowMap.set(dept, row);
+    }
+
+    const total = (row: Record<string, string | number>) =>
+      batches.reduce((sum, b) => sum + (Number(row[b]) || 0), 0);
+
+    const departmentBatch = Array.from(rowMap.values()).sort(
+      (a, b) => total(b) - total(a),
+    );
+
+    return {
+      success: true as const,
+      data: {
+        totalStudents: byDepartment.reduce((sum, d) => sum + d.count, 0),
+        byDepartment,
+        registrations,
+        departmentBatch: { batches, rows: departmentBatch },
+        filterOptions: {
+          departments: (departmentOptions as (string | null)[])
+            .filter((v): v is string => Boolean(v))
+            .sort(),
+          batches: (batchOptions as (string | null)[])
+            .filter((v): v is string => Boolean(v))
+            .sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Admin student reports error:", error);
+
+    return {
+      success: false as const,
+      message: "Failed to load student reports.",
+    };
+  }
+}
+
+// Faculty reports (charts) for admin
+export async function getAdminFacultyReportsAction(filters?: {
+  department?: string;
+  designation?: string;
+}) {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return { success: false as const, message: "Please login first." };
+    }
+
+    if (auth.user.role !== "admin") {
+      return { success: false as const, message: "Unauthorized access." };
+    }
+
+    await connectDB();
+
+    const department = filters?.department?.trim() || "";
+    const designation = filters?.designation?.trim() || "";
+
+    const match: Record<string, unknown> = {};
+
+    if (department) match.departmentNames = department;
+    if (designation) match.designation = designation;
+
+    const [
+      byDepartmentRaw,
+      byDesignationRaw,
+      topUpvotedRaw,
+      totalsRaw,
+      reviewStatusRaw,
+      departmentOptions,
+      designationOptions,
+    ] = await Promise.all([
+      Faculty.aggregate([
+        { $match: match },
+        { $unwind: "$departmentNames" },
+        ...(department ? [{ $match: { departmentNames: department } }] : []),
+        { $group: { _id: "$departmentNames", count: { $sum: 1 } } },
+        { $sort: { count: -1, _id: 1 } },
+      ]),
+      Faculty.aggregate([
+        { $match: match },
+        { $group: { _id: "$designation", count: { $sum: 1 } } },
+        { $sort: { count: -1, _id: 1 } },
+      ]),
+      Faculty.find({ ...match, upvoteCount: { $gt: 0 } })
+        .sort({ upvoteCount: -1, name: 1 })
+        .limit(10)
+        .select("name upvoteCount")
+        .lean(),
+      Faculty.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: null,
+            totalFaculty: { $sum: 1 },
+            totalUpvotes: { $sum: "$upvoteCount" },
+          },
+        },
+      ]),
+      FacultyReview.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+      Faculty.distinct("departmentNames"),
+      Faculty.distinct("designation"),
+    ]);
+
+    const statusCount = (status: string) =>
+      (reviewStatusRaw.find((item) => item._id === status)?.count as
+        | number
+        | undefined) ?? 0;
+
+    return {
+      success: true as const,
+      data: {
+        totalFaculty: (totalsRaw[0]?.totalFaculty as number | undefined) ?? 0,
+        totalUpvotes: (totalsRaw[0]?.totalUpvotes as number | undefined) ?? 0,
+        pendingReviews: statusCount("pending"),
+        byDepartment: byDepartmentRaw.map((item) => ({
+          department: String(item._id),
+          count: item.count as number,
+        })),
+        byDesignation: byDesignationRaw.map((item) => ({
+          designation: String(item._id),
+          count: item.count as number,
+        })),
+        topUpvoted: topUpvotedRaw.map((item) => ({
+          name: String(item.name),
+          upvotes: Number(item.upvoteCount),
+        })),
+        reviewsByStatus: [
+          { status: "approved", count: statusCount("approved") },
+          { status: "pending", count: statusCount("pending") },
+          { status: "rejected", count: statusCount("rejected") },
+        ],
+        filterOptions: {
+          departments: (departmentOptions as string[]).filter(Boolean).sort(),
+          designations: (designationOptions as string[]).filter(Boolean).sort(),
+        },
+      },
+    };
+  } catch (error) {
+    console.error("Admin faculty reports error:", error);
+
+    return {
+      success: false as const,
+      message: "Failed to load faculty reports.",
+    };
+  }
+}
+// Faculty management overview (KPIs) 
+export async function getAdminFacultyOverviewAction() {
+  try {
+    const auth = await getCurrentUserAction();
+
+    if (!auth.success || !auth.user) {
+      return { success: false as const, message: "Please login first." };
+    }
+
+    if (auth.user.role !== "admin") {
+      return { success: false as const, message: "Unauthorized access." };
+    }
+
+    await connectDB();
+
+    const [
+      totalFaculty,
+      activeFaculty,
+      inactiveFaculty,
+      upvotesRaw,
+      pendingReviews,
+      totalReviews,
+    ] = await Promise.all([
+      Faculty.countDocuments({}),
+      Faculty.countDocuments({ profileStatus: "active" }),
+      Faculty.countDocuments({ profileStatus: "inactive" }),
+      Faculty.aggregate([
+        { $group: { _id: null, total: { $sum: "$upvoteCount" } } },
+      ]),
+      FacultyReview.countDocuments({ status: "pending" }),
+      FacultyReview.countDocuments({}),
+    ]);
+
+    return {
+      success: true as const,
+      stats: {
+        totalFaculty,
+        activeFaculty,
+        inactiveFaculty,
+        totalUpvotes: (upvotesRaw[0]?.total as number | undefined) ?? 0,
+        pendingReviews,
+        totalReviews,
+      },
+    };
+  } catch (error) {
+    console.error("Admin faculty overview error:", error);
+
+    return {
+      success: false as const,
+      message: "Failed to load faculty overview.",
+    };
+  }
+}

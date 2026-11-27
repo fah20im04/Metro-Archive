@@ -574,7 +574,7 @@ export default function UserManagement({
             </div>
           )}
 
-          <table className="w-full min-w-[1050px] text-left">
+          <table className="w-full min-w-262.5 text-left">
             <thead className="bg-background/70">
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wider text-muted">
                 <th className="px-6 py-4">User</th>
@@ -613,13 +613,13 @@ export default function UserManagement({
                         </div>
 
                         <div className="min-w-0">
-                          <p className="max-w-[190px] truncate text-sm font-semibold text-foreground">
+                          <p className="max-w-47.5 truncate text-sm font-semibold text-foreground">
                             {user.name}
                           </p>
 
                           <p className="mt-1 flex items-center gap-1 text-xs text-muted">
                             <Mail size={12} />
-                            <span className="max-w-[190px] truncate">
+                            <span className="max-w-47.5 truncate">
                               {user.email}
                             </span>
                           </p>
@@ -821,7 +821,7 @@ export default function UserManagement({
               <div>
                 <h2 className="text-lg font-bold text-foreground">Edit User</h2>
                 <p className="mt-1 text-sm text-muted">
-                  Update this user's account information.
+                  Update this user&apos;s account information.
                 </p>
               </div>
 
