@@ -66,11 +66,6 @@ const adminLinks = [
     icon: Archive,
   },
   {
-    label: "Question Management",
-    href: "/dashboard/admin/resources",
-    icon: BookOpen,
-  },
-  {
     label: "Review Moderation",
     href: "/dashboard/admin/reviews",
     icon: ShieldCheck,
